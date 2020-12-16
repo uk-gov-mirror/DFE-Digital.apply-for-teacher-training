@@ -1,8 +1,6 @@
 class ChangeOffer
   include ActiveModel::Validations
 
-  attr_reader :offer
-
   validate :offer_is_valid
 
   def initialize(actor:, offer:)
@@ -13,9 +11,8 @@ class ChangeOffer
   def save
     @auth.assert_can_make_decisions! application_choice: @offer.application_choice, course_option_id: @offer.course_option.id
     if valid?
-      @offer.save!
+      offer.save!
 
-      SetDeclineByDefault.new(application_form: @offer.application_choice.application_form).call
       CandidateMailer.changed_offer(@offer.application_choice).deliver_later
       StateChangeNotifier.call(:change_an_offer, application_choice: @offer.application_choice)
 

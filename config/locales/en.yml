@@ -198,6 +198,16 @@ en:
       complaints: Complaints
       terms_of_use: Terms of use
       privacy_policy: Privacy policy
+  helpers:
+    label:
+      provider_interface_make_offer_form[further_conditions_attributes][0]:
+        condition_text: First condition
+      provider_interface_make_offer_form[further_conditions_attributes][1]:
+        condition_text: Second condition
+      provider_interface_make_offer_form[further_conditions_attributes][2]:
+        condition_text: Third condition
+      provider_interface_make_offer_form[further_conditions_attributes][3]:
+        condition_text: Further condition
   activemodel:
     attributes:
       vendor_api/metadata:
@@ -207,11 +217,6 @@ en:
         user_id: user_id
         email: email
         full_name: full_name
-      support_interface/new_offer:
-        further_conditions0: First condition
-        further_conditions1: Second condition
-        further_conditions2: Third condition
-        further_conditions3: Further condition
       make_an_offer:
         course_option: The requested course
       change_offer:
@@ -232,10 +237,6 @@ en:
               blank: Last name cannot be blank
             provider_permissions:
               blank: Please specify a provider
-        support_interface/new_offer_form:
-          attributes:
-            further_conditions:
-              too_long: "%{name} must be %{limit} characters or fewer"
         support_interface/application_forms/edit_applicant_details_form:
           attributes:
             phone_number:
@@ -347,6 +348,10 @@ en:
               blank: Enter the user’s last name
             provider_permissions:
               blank: Please specify a provider
+        provider_interface/make_offer_form/further_condition:
+          attributes:
+            condition_text:
+              too_long: "%{attribute} must be %{count} characters or fewer"
         make_an_offer:
           attributes:
             course_option:

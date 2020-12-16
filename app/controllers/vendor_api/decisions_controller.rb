@@ -17,13 +17,13 @@ module VendorAPI
                         application_choice.course_option
                       end
 
-      if application_choice.offer?
-        offer = Offer.new(
-          application_choice: application_choice,
-          course_option: course_option,
-          conditions: params.dig(:data, :conditions),
-        )
+      offer = Offer.new(
+        application_choice: application_choice,
+        course_option: course_option,
+        conditions: params.dig(:data, :conditions),
+      )
 
+      if application_choice.offer?
         change_offer = ChangeOffer.new(
           actor: @api_user,
           offer: offer,
@@ -39,9 +39,7 @@ module VendorAPI
       else
         make_offer = MakeAnOffer.new(
           actor: @api_user,
-          application_choice: application_choice,
-          course_option: course_option,
-          offer_conditions: params.dig(:data, :conditions),
+          offer: offer,
         )
 
         respond_to_decision(make_offer)

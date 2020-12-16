@@ -1,21 +1,21 @@
-<% content_for :browser_title, title_with_error_prefix(t('page_titles.provider.confirm'), @application_offer.errors.any?) %>
+<% content_for :browser_title, title_with_error_prefix(t('page_titles.provider.confirm'), @make_offer_form.errors.any?) %>
 <% content_for :before_content, govuk_back_link_to(provider_interface_application_choice_new_offer_path(@application_choice.id)) %>
 
 <%= render(FlashMessageComponent.new(flash: flash)) %>
 
 <% conditions = capture do %>
-  <% if @application_offer.offer_conditions.empty? %>
+  <% if @make_offer_form.conditions.empty? %>
     No conditions have been set for this offer
   <% else %>
     <ul class="govuk-list govuk-list--bullet">
-      <% @application_offer.offer_conditions.each do |value| %>
+      <% @make_offer_form.conditions.each do |value| %>
         <li><%= value %></li>
       <% end %>
     </ul>
   <% end %>
 <% end %>
 
-<%= form_with model: @application_offer, url: provider_interface_application_choice_create_offer_path(@application_choice.id), method: :post do |f| %>
+<%= form_with model: @make_offer_form, url: provider_interface_application_choice_create_offer_path(@application_choice.id), method: :post do |f| %>
   <h1 class="govuk-heading-xl">
     <span class="govuk-caption-xl"><%= @application_choice.application_form.full_name %></span>
     Check and confirm offer
@@ -25,12 +25,14 @@
     <div class="govuk-grid-column-two-thirds">
       <%= f.govuk_error_summary %>
 
+      <%= hidden_field_tag :course_option_id, @make_offer_form.course_option_id %>
+
       <%= render SummaryListComponent.new(rows: [
-        { key: 'Provider', value: @application_offer.course_option.provider.name_and_code },
-        { key: 'Course', value: @application_offer.course_option.course.name_and_code },
-        { key: 'Full time or part time', value: @application_offer.course_option.study_mode.humanize },
-        { key: 'Location', value: @application_offer.course_option.site.name },
-        { key: 'Starting', value: @application_offer.course_option.course.recruitment_cycle_year },
+        { key: 'Provider', value: @make_offer_form.course_option.provider.name_and_code },
+        { key: 'Course', value: @make_offer_form.course_option.course.name_and_code },
+        { key: 'Full time or part time', value: @make_offer_form.course_option.study_mode.humanize },
+        { key: 'Location', value: @make_offer_form.course_option.site.name },
+        { key: 'Starting', value: @make_offer_form.course_option.course.recruitment_cycle_year },
         { key: 'Conditions', value: conditions },
       ]) %>
 
@@ -41,10 +43,12 @@
         Once the candidate has accepted, you can only change the conditions of this offer with their permission.
       </p>
 
-      <%= hidden_field_tag :course_option_id, @application_offer.course_option.id %>
+      <% @make_offer_form.further_conditions.each do |condition| %>
+        <%= hidden_field_tag :"further_conditions[]", condition %>
+      <% end %>
 
-      <% @application_offer.offer_conditions.each do |condition| %>
-        <%= hidden_field_tag :"offer_conditions[]", condition %>
+      <% @make_offer_form.standard_conditions.each do |condition| %>
+        <%= hidden_field_tag :"standard_conditions[]", condition %>
       <% end %>
 
       <%= f.govuk_submit 'Make offer' %>

@@ -25,42 +25,30 @@ module ProviderInterface
                         @application_choice.course_option
                       end
 
-      @application_offer = MakeAnOffer.new(
-        actor: current_provider_user,
-        application_choice: @application_choice,
-        course_option: course_option,
-      )
+      @make_offer_form = ProviderInterface::MakeOfferForm.new(course_option_id: course_option.id)
     end
 
     def confirm_offer
-      course_option = CourseOption.find(params[:course_option_id])
+      @make_offer_form = ProviderInterface::MakeOfferForm.new(make_offer_form_params.merge(application_choice: @application_choice))
 
-      @application_offer = MakeAnOffer.new(
-        actor: current_provider_user,
-        application_choice: @application_choice,
-        course_option: course_option,
-        standard_conditions: make_an_offer_params[:standard_conditions],
-        further_conditions: make_an_offer_params.permit(
-          :further_conditions0,
-          :further_conditions1,
-          :further_conditions2,
-          :further_conditions3,
-        ).to_h,
-      )
-      render action: :new_offer if !@application_offer.valid?
+      if !@make_offer_form.valid?
+        render action: :new_offer
+      end
     end
 
     def create_offer
-      course_option = CourseOption.find(params[:course_option_id])
+      @make_offer_form = ProviderInterface::MakeOfferForm.new(make_offer_form_params.merge(application_choice: @application_choice))
 
-      @application_offer = MakeAnOffer.new(
+      if !@make_offer_form.valid?
+        render action: :new_offer
+      end
+
+      make_offer = MakeAnOffer.new(
         actor: current_provider_user,
-        application_choice: @application_choice,
-        course_option: course_option,
-        offer_conditions: params.dig(:offer_conditions),
+        offer: @make_offer_form.offer,
       )
 
-      if @application_offer.save
+      if make_offer.save
         flash[:success] = 'Offer successfully made to candidate'
         redirect_to provider_interface_application_choice_path(
           application_choice_id: @application_choice.id,
@@ -155,8 +143,8 @@ module ProviderInterface
 
   private
 
-    def make_an_offer_params
-      params.require(:make_an_offer)
+    def make_offer_form_params
+      params.require(:provider_interface_make_offer_form).permit(:course_option_id, standard_conditions: [], further_conditions_attributes: {})
     end
 
     def redirect_to_structured_reasons_for_rejection_if_enabled
