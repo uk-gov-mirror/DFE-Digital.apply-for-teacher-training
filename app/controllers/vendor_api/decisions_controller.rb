@@ -18,14 +18,18 @@ module VendorAPI
                       end
 
       if application_choice.offer?
-        change_offer = ChangeOffer.new(
-          actor: @api_user,
+        offer = Offer.new(
           application_choice: application_choice,
           course_option: course_option,
-          offer_conditions: params.dig(:data, :conditions),
+          conditions: params.dig(:data, :conditions),
         )
 
-        if change_offer.identical_to_existing_offer?
+        change_offer = ChangeOffer.new(
+          actor: @api_user,
+          offer: offer,
+        )
+
+        if offer.identical_to_existing_offer?
           # noop - allow multiple POSTs (effectively PUTs) of the same offer
           # to support vendors who don’t trust the network
           render_application

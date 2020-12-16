@@ -12,8 +12,11 @@ RSpec.describe ChangeOffer do
     choice.reload
   end
 
+  let(:conditions) { [] }
+  let(:offer) { Offer.new(application_choice: application_choice, course_option: new_course_option, conditions: conditions) }
+
   def service
-    ChangeOffer.new(actor: provider_user, application_choice: application_choice, course_option: new_course_option)
+    ChangeOffer.new(actor: provider_user, offer: offer)
   end
 
   it 'changes offered_course_option_id for the application choice' do
@@ -30,7 +33,7 @@ RSpec.describe ChangeOffer do
     end
   end
 
-  it 'groups offer(ed)_ changes in a single audit', with_audited: true do
+  it 'groups offer(ed) changes in a single audit', with_audited: true do
     service.save
 
     audit_with_option_id =
@@ -41,18 +44,15 @@ RSpec.describe ChangeOffer do
     expect(audit_with_option_id.audited_changes).to have_key('offer_changed_at')
   end
 
-  it 'replaces conditions if offer_conditions is supplied' do
-    application_choice.update(offer: { 'conditions' => ['DBS check'] })
+  context 'when conditions are supplied' do
+    let(:conditions) { ['First condition', 'Second condition'] }
 
-    with_conditions = ChangeOffer.new(
-      actor: provider_user,
-      application_choice: application_choice,
-      course_option: new_course_option,
-      offer_conditions: ['First condition', 'Second condition'],
-    )
+    it 'replaces conditions if offer_conditions is supplied' do
+      application_choice.update(offer: { 'conditions' => ['DBS check'] })
 
-    expect { with_conditions.save }.to change(application_choice, :offer)
-    expect(application_choice.offer['conditions']).to eq(['First condition', 'Second condition'])
+      expect { service.save }.to change(application_choice, :offer)
+      expect(application_choice.offer['conditions']).to eq(['First condition', 'Second condition'])
+    end
   end
 
   it 'resets declined_by_default_at for the application choice' do
@@ -73,56 +73,5 @@ RSpec.describe ChangeOffer do
     allow(StateChangeNotifier).to receive(:call).and_return(nil)
     service.save
     expect(StateChangeNotifier).to have_received(:call).with(:change_an_offer, application_choice: application_choice)
-  end
-
-  describe 'course option validation' do
-    it 'checks the course option is present' do
-      change = ChangeOffer.new(actor: provider_user, application_choice: application_choice, course_option: nil)
-
-      expect(change).not_to be_valid
-
-      expect(change.errors[:course_option]).to include('could not be found')
-    end
-
-    it 'checks the course option and conditions are different from the current option' do
-      application_choice.update(offer: { 'conditions' => ['DBS check'] })
-      change = ChangeOffer.new(actor: provider_user, application_choice: application_choice, course_option: application_choice.offered_option, offer_conditions: ['DBS check'])
-
-      expect(change).not_to be_valid
-
-      expect(change.errors[:base]).to include('The new offer is identical to the current offer')
-    end
-
-    it 'checks the course is open on apply' do
-      new_course_option = create(:course_option, course: create(:course, provider: provider, open_on_apply: false))
-      change = ChangeOffer.new(actor: provider_user, application_choice: application_choice, course_option: new_course_option)
-
-      expect(change).not_to be_valid
-
-      expect(change.errors[:course_option]).to include('is not open for applications via the Apply service')
-    end
-  end
-
-  describe '#is_identical_to_existing_offer?' do
-    it 'returns true when offer and conditions match' do
-      application_choice.update(offer: { 'conditions' => ['DBS check'] })
-      change = ChangeOffer.new(actor: provider_user, application_choice: application_choice, course_option: application_choice.offered_option, offer_conditions: ['DBS check'])
-
-      expect(change).to be_identical_to_existing_offer
-    end
-
-    it 'returns false when offer matches, but not conditions' do
-      application_choice.update(offer: { 'conditions' => ['Different things'] })
-      change = ChangeOffer.new(actor: provider_user, application_choice: application_choice, course_option: application_choice.offered_option, offer_conditions: ['DBS check'])
-
-      expect(change).not_to be_identical_to_existing_offer
-    end
-
-    it 'returns false when conditions match, but not offer' do
-      application_choice.update(offer: { 'conditions' => ['DBS check'] })
-      change = ChangeOffer.new(actor: provider_user, application_choice: application_choice, course_option: new_course_option, offer_conditions: ['DBS check'])
-
-      expect(change).not_to be_identical_to_existing_offer
-    end
   end
 end
