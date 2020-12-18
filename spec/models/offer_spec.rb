@@ -1,15 +1,15 @@
 require 'rails_helper'
 
 RSpec.describe Offer do
-  describe 'course option validation' do
-    let(:application_choice) { create(:application_choice) }
+  let(:application_choice) { create(:application_choice) }
 
+  describe 'course option validation' do
     it 'checks the course option is present' do
       offer = Offer.new(application_choice: application_choice, course_option: nil)
 
       expect(offer).not_to be_valid
 
-      expect(offer.errors[:course_option]).to include("could not be found")
+      expect(offer.errors[:course_option]).to include('could not be found')
     end
 
     it 'checks the course option and conditions are different from the current option' do
@@ -28,6 +28,16 @@ RSpec.describe Offer do
       expect(offer).not_to be_valid
 
       expect(offer.errors[:course_option]).to include('is not open for applications via the Apply service')
+    end
+  end
+
+  describe 'conditions validation' do
+    it 'checks there aren’t too many conditions' do
+      offer = Offer.new(application_choice: application_choice, conditions: Array.new(21))
+
+      expect(offer).not_to be_valid
+
+      expect(offer.errors[:conditions]).to include('has over 20 elements')
     end
   end
 end

@@ -8,9 +8,9 @@ class Offer
 
   validates :course_option, presence: true
   validate :validate_offer_is_not_identical
+  validate :application_choice_can_receive_offer
   validate :validate_course_option_is_open_on_apply
   validate :validate_conditions_max_length
-  validate :application_choice_can_receive_offer
 
   def save!
     raise unless valid?
@@ -28,13 +28,14 @@ class Offer
 
   def identical_to_existing_offer?
     course_option.present? && \
+      application_choice.offer.present? && \
       course_option == application_choice.offered_option && \
       application_choice.offer['conditions'] == conditions
   end
 
 private
 
-  def save_as_new_offer
+  def save_as_new_offer!
     application_choice.status = 'offer'
     application_choice.offered_course_option = course_option
     application_choice.offer = { 'conditions' => conditions }
@@ -53,7 +54,7 @@ private
   end
 
   def changing_existing_offer?
-    application_choice.offered_option.present?
+    application_choice.offer.present?
   end
 
   def validate_offer_is_not_identical
@@ -69,9 +70,9 @@ private
   end
 
   def validate_conditions_max_length
-    return if offer_conditions.is_a?(Array) && offer_conditions.count <= MAX_CONDITIONS_COUNT
-
-    errors.add(:offer_conditions, "has over #{MAX_CONDITIONS_COUNT} elements")
+    if Array.wrap(conditions).count > MAX_CONDITIONS_COUNT
+      errors.add(:conditions, "has over #{MAX_CONDITIONS_COUNT} elements")
+    end
   end
 
   def application_choice_can_receive_offer

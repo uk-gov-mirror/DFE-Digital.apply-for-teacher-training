@@ -25,7 +25,7 @@
     <div class="govuk-grid-column-two-thirds">
       <%= f.govuk_error_summary %>
 
-      <%= hidden_field_tag :course_option_id, @make_offer_form.course_option_id %>
+      <%= f.hidden_field :course_option_id %>
 
       <%= render SummaryListComponent.new(rows: [
         { key: 'Provider', value: @make_offer_form.course_option.provider.name_and_code },
@@ -43,12 +43,11 @@
         Once the candidate has accepted, you can only change the conditions of this offer with their permission.
       </p>
 
-      <% @make_offer_form.further_conditions.each do |condition| %>
-        <%= hidden_field_tag :"further_conditions[]", condition %>
-      <% end %>
+      <%= f.hidden_field :standard_conditions %>
 
-      <% @make_offer_form.standard_conditions.each do |condition| %>
-        <%= hidden_field_tag :"standard_conditions[]", condition %>
+      <%= f.fields_for :further_conditions do |fc| %>
+        <%= fc.hidden_field :id %>
+        <%= fc.hidden_field :condition_text %>
       <% end %>
 
       <%= f.govuk_submit 'Make offer' %>

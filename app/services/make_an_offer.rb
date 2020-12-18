@@ -1,5 +1,5 @@
 class MakeAnOffer
-  include ActiveModel::Model
+  include ActiveModel::Validations
 
   validate :offer_is_valid
 
@@ -9,9 +9,10 @@ class MakeAnOffer
   end
 
   def save
-    @auth.assert_can_make_decisions!(application_choice: offer.application_choice, course_option_id: @offer.course_option.id)
     if valid?
-      offer.save!
+      @auth.assert_can_make_decisions!(application_choice: @offer.application_choice, course_option_id: @offer.course_option.id)
+
+      @offer.save!
 
       SendNewOfferEmailToCandidate.new(application_choice: @offer.application_choice).call
       StateChangeNotifier.call(:make_an_offer, application_choice: @offer.application_choice)
@@ -25,8 +26,8 @@ class MakeAnOffer
 private
 
   def offer_is_valid
-    if offer.invalid?
-      offer.errors.each do |field, error|
+    if @offer.invalid?
+      @offer.errors.each do |field, error|
         errors.add(field, error)
       end
     end

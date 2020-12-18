@@ -134,6 +134,8 @@ RSpec.feature 'Provider changes an offer' do
     expect(page).to have_content @course_option_three.site.name_and_address
 
     click_on 'Change offer'
+
+    save_and_open_page
   end
 
   def then_the_offer_has_new_course_study_mode_and_location_details
