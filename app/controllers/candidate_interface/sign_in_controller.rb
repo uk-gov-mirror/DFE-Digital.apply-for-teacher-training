@@ -22,13 +22,16 @@ module CandidateInterface
       )
 
       if authentication_token&.still_valid?
+        Event.emit('Sign in confirmation page visit', candidate: candidate)
         render 'confirm_authentication'
       elsif authentication_token
+        Event.emit('Sign in link expired', candidate: candidate)
         # If the token is expired, redirect the user to a page
         # with their token as a param where they can request
         # a new sign in email.
         redirect_to candidate_interface_expired_sign_in_path(token: params[:token], path: params[:path])
       else
+        # TODO: When does this happen?
         redirect_to(action: :new)
       end
     end
@@ -40,10 +43,12 @@ module CandidateInterface
         raw_token: params[:token],
       )
 
-      redirect_to(action: :new) and return if authentication_token.nil?
-
-      if authentication_token && authentication_token.still_valid?
+      if authentication_token.nil?
+        Event.emit('Token not found')
+        redirect_to(action: :new) and return
+      elsif authentication_token.still_valid?
         candidate = authentication_token.user
+        Event.emit('Successful sign in', candidate: candidate)
         flash[:success] = t('apply_from_find.account_created_message') if candidate.last_signed_in_at.nil?
         sign_in(candidate, scope: :candidate)
         add_identity_to_log(candidate.id)
@@ -52,6 +57,7 @@ module CandidateInterface
 
         redirect_to candidate_interface_interstitial_path(path: params[:path])
       else
+        Event.emit('Sign in link expired', candidate: authentication_token.user)
         redirect_to candidate_interface_expired_sign_in_path(token: params[:token], path: params[:path])
       end
     end
