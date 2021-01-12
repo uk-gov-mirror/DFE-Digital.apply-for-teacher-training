@@ -9,7 +9,7 @@ en:
         other: "was rejected by %{providers}"
     withdrawn:
       message:
-        primary: ":runner: %{applicant} has withdrawn their remaining applications from %{providers}."
+        primary: ":runner: %{applicant} has withdrawn their applications from %{providers}."
         other: "withdrew from %{providers}"
     recruited:
       message:
