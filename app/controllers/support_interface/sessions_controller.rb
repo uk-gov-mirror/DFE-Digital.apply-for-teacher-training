@@ -23,36 +23,45 @@ module SupportInterface
     end
 
     def sign_in_by_email
-      render_404 and return unless FeatureFlag.active?('dfe_sign_in_fallback')
+      render_404 and return unless FeatureFlag.active?(:dfe_sign_in_fallback)
 
       support_user = SupportUser.find_by(email_address: params.dig(:support_user, :email_address).downcase.strip)
 
       if support_user
-        SupportInterface::MagicLinkAuthentication.send_token!(support_user: support_user)
+        magic_link_token = support_user.create_magic_link_token!
+        SupportMailer.fallback_sign_in_email(support_user, magic_link_token).deliver_later
       end
 
       redirect_to support_interface_check_your_email_path
     end
 
     def authenticate_with_token
-      redirect_to action: :new and return unless FeatureFlag.active?('dfe_sign_in_fallback')
+      redirect_to action: :new and return unless FeatureFlag.active?(:dfe_sign_in_fallback)
 
       render_404 and return unless params[:token]
 
-      support_user = SupportInterface::MagicLinkAuthentication.get_user_from_token!(token: params.fetch(:token))
+      authentication_token = AuthenticationToken.find_by_hashed_token(
+        user_type: 'SupportUser',
+        raw_token: params[:token],
+      )
 
-      # Equivalent to calling DfESignInUser.begin_session!
-      session['dfe_sign_in_user'] = {
-        'email_address' => support_user.email_address,
-        'dfe_sign_in_uid' => support_user.dfe_sign_in_uid,
-        'first_name' => support_user.first_name,
-        'last_name' => support_user.last_name,
-        'last_active_at' => Time.zone.now,
-      }
+      if authentication_token && authentication_token.still_valid?
+        # Equivalent to calling DfESignInUser.begin_session!
+        session['dfe_sign_in_user'] = {
+          'email_address' => support_user.email_address,
+          'dfe_sign_in_uid' => support_user.dfe_sign_in_uid,
+          'first_name' => support_user.first_name,
+          'last_name' => support_user.last_name,
+          'last_active_at' => Time.zone.now,
+        }
 
-      support_user.update!(last_signed_in_at: Time.zone.now)
+        support_user.update!(last_signed_in_at: Time.zone.now)
+        authentication_token.update!(used_at: Time.zone.now)
 
-      redirect_to support_interface_candidates_path
+        redirect_to support_interface_candidates_path
+      else
+        redirect_to(action: :new)
+      end
     end
   end
 end
