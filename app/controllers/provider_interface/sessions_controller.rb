@@ -21,12 +21,13 @@ module ProviderInterface
     end
 
     def sign_in_by_email
-      render_404 and return unless FeatureFlag.active?('dfe_sign_in_fallback')
+      render_404 and return unless FeatureFlag.active?(:dfe_sign_in_fallback)
 
       provider_user = ProviderUser.find_by(email_address: params.dig(:provider_user, :email_address).downcase.strip)
 
       if provider_user && provider_user.dfe_sign_in_uid.present?
-        ProviderInterface::MagicLinkAuthentication.send_token!(provider_user: provider_user)
+        magic_link_token = provider_user.create_magic_link_token!
+        ProviderMailer.fallback_sign_in_email(provider_user, magic_link_token).deliver_later
       end
 
       redirect_to provider_interface_check_your_email_path
@@ -35,24 +36,34 @@ module ProviderInterface
     def check_your_email; end
 
     def authenticate_with_token
-      redirect_to action: :new and return unless FeatureFlag.active?('dfe_sign_in_fallback')
+      redirect_to action: :new and return unless FeatureFlag.active?(:dfe_sign_in_fallback)
 
       render_404 and return unless params[:token]
 
-      provider_user = ProviderInterface::MagicLinkAuthentication.get_user_from_token!(token: params[:token])
+      authentication_token = AuthenticationToken.find_by_hashed_token(
+        user_type: 'ProviderUser',
+        raw_token: params[:token],
+      )
 
-      # Equivalent to calling DfESignInUser.begin_session!
-      session['dfe_sign_in_user'] = {
-        'email_address' => provider_user.email_address,
-        'dfe_sign_in_uid' => provider_user.dfe_sign_in_uid,
-        'first_name' => provider_user.first_name,
-        'last_name' => provider_user.last_name,
-        'last_active_at' => Time.zone.now,
-      }
+      if authentication_token && authentication_token.still_valid?
+        provider_user = authentication_token.user
 
-      provider_user.update!(last_signed_in_at: Time.zone.now)
+        # Equivalent to calling DfESignInUser.begin_session!
+        session['dfe_sign_in_user'] = {
+          'email_address' => provider_user.email_address,
+          'dfe_sign_in_uid' => provider_user.dfe_sign_in_uid,
+          'first_name' => provider_user.first_name,
+          'last_name' => provider_user.last_name,
+          'last_active_at' => Time.zone.now,
+        }
 
-      redirect_to provider_interface_applications_path
+        provider_user.update!(last_signed_in_at: Time.zone.now)
+        authentication_token.update!(used_at: Time.zone.now)
+
+        redirect_to provider_interface_applications_path
+      else
+        redirect_to action: :new
+      end
     end
 
   private

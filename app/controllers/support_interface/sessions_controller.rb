@@ -46,6 +46,8 @@ module SupportInterface
       )
 
       if authentication_token && authentication_token.still_valid?
+        support_user = authentication_token.user
+
         # Equivalent to calling DfESignInUser.begin_session!
         session['dfe_sign_in_user'] = {
           'email_address' => support_user.email_address,
