@@ -7,19 +7,16 @@
       <span class="govuk-caption-l"><%= @application_choice.application_form.full_name %></span>
       <%= t('page_titles.provider.confirm_reject') %>
     </h1>
-    <%= render ProviderInterface::InterviewDetailsComponent.new(@new_interview_form) %>
-    <%= form_with model: @interview_form, url: provider_interface_application_choice_create_reject_path(@application_choice.id), method: :post do |f| %>
+    <%= form_with model: @interview_form, url: provider_interface_application_choice_create_interview_path(@application_choice.id), method: :post do |f| %>
       <div class="govuk-grid-row">
         <div class="govuk-grid-column-two-thirds">
           <%= f.govuk_error_summary %>
         </div>
       </div>
 
-      <%= render ProviderInterface::FeedbackPreviewComponent.new(application_choice: @application_choice, rejection_reason: @reject_application.rejection_reason) %>
+      <%= render ProviderInterface::InterviewDetailsComponent.new(@interview_form) %>
 
-      <%= f.hidden_field :rejection_reason %>
-
-      <%= f.govuk_submit 'Reject application' %>
+      <%= f.govuk_submit 'Send interview details' %>
 
       <p class="govuk-body">
         <%= govuk_link_to 'Cancel', provider_interface_application_choice_path(@application_choice.id), class: 'govuk-link--no-visited-state' %>

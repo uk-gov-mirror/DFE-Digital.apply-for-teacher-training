@@ -2,8 +2,8 @@ module ProviderInterface
   class InterviewDetailsComponent < ViewComponent::Base
     include ViewHelper
 
-    def initialize(new_interview_form)
-      @interview_form = new_interview_form
+    def initialize(interview_form)
+      @interview_form = interview_form
     end
 
     def rows
