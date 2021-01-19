@@ -30,10 +30,8 @@ module ProviderInterface
       render :check unless @interview_form.save
 
       flash[:success] = 'Interview set up'
-      redirect_to provider_interface_application_choice_path(@application_choice)
+      redirect_to provider_interface_application_choice_interviews_path(@application_choice)
     end
-
-  private
 
     def cancel
       @interview = @application_choice.interviews.find(params[:id])
@@ -58,6 +56,8 @@ module ProviderInterface
       flash['success'] = 'Interview cancelled'
       redirect_to provider_interface_application_choice_path(@application_choice)
     end
+
+  private
 
     def cancellation_reason
       params.require(:interview).permit(:cancellation_reason)[:cancellation_reason]
