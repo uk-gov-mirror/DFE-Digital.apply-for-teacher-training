@@ -34,6 +34,7 @@ gem 'json-schema'
 gem 'json_api_client'
 
 gem 'sentry-raven'
+gem 'simple_segment'
 
 gem 'factory_bot_rails'
 gem 'faker'

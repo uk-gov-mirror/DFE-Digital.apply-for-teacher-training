@@ -22,13 +22,16 @@ module CandidateInterface
       )
 
       if @authentication_token&.still_valid?
+        AnalyticsEvent.emit('Sign in confirmation page visit', candidate: candidate)
         render 'confirm_authentication'
       elsif @authentication_token
         # If the token is expired, redirect the user to a page
         # with their token as a param where they can request
         # a new sign in email.
+        AnalyticsEvent.emit('Sign in link expired', candidate: candidate)
         redirect_to candidate_interface_expired_sign_in_path(token: params[:token], path: params[:path])
       elsif params[:u]
+        AnalyticsEvent.emit('Legacy sign in link expired', candidate: candidate)
         redirect_to candidate_interface_expired_sign_in_path(u: params[:u], path: params[:path])
       else
         redirect_to(action: :new)
@@ -52,8 +55,10 @@ module CandidateInterface
         candidate.update!(last_signed_in_at: Time.zone.now)
         authentication_token.update!(used_at: Time.zone.now)
 
+        AnalyticsEvent.emit('Sign in success', candidate: candidate)
         redirect_to candidate_interface_interstitial_path(path: params[:path])
       else
+        AnalyticsEvent.emit('Sign in link expired', candidate: candidate)
         redirect_to candidate_interface_expired_sign_in_path(token: params[:token], path: params[:path])
       end
     end
@@ -84,8 +89,9 @@ module CandidateInterface
         end
 
       if candidate
+        AnalyticsEvent.emit('Sign in success', candidate: candidate)
         CandidateInterface::RequestMagicLink.for_sign_in(candidate: candidate, path: authentication_token&.path)
-        add_identity_to_log candidate.id
+        add_identity_to_log(candidate.id)
         redirect_to candidate_interface_check_email_sign_in_path
       else
         render 'errors/not_found', status: :forbidden
