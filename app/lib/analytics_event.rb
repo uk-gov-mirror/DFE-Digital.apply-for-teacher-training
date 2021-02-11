@@ -3,23 +3,28 @@ class AnalyticsEvent
     write_key: 'ReXI48ZIFSXD82KI1ZTuotyLMu2PHUib',
   )
 
-  def self.emit(name, candidate: nil)
+  def self.identify(candidate:)
+    CLIENT.identify(
+      user_id: "Candidate##{candidate.id}",
+      traits: {
+        email: candidate.email_address,
+      }
+    )
+  end
+
+  def self.emit(name, candidate: nil, session:)
+    return unless FeatureFlag.active?(:event_tracking)
+
+    event_params = {
+      event: name,
+    }
 
     if candidate
-      user_id = "Candidate##{candidate.id}"
+      event_params.merge!(user_id: "Candidate##{candidate.id}")
     else
-      user_id = nil
+      event_params.merge!(anonymous_id: session[:session_id])
     end
 
-    analytics.track(
-      user_id: user_id,
-      event: name,
-    )
-
-    event_attributes = {}
-
-    event_attributes.merge!(RequestLocals.fetch(:identity) { } || {})
-    event_attributes.merge!(RequestLocals.fetch(:debugging_info) {} || {})
-    event_attributes.merge!(RequestLocals.fetch(:params) {} || {})
+    CLIENT.track(event_params)
   end
 end

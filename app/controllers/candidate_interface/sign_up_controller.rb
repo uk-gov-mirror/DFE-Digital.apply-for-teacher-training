@@ -17,12 +17,14 @@ module CandidateInterface
 
       if @sign_up_form.existing_candidate?
         CandidateInterface::RequestMagicLink.for_sign_in(candidate: @sign_up_form.candidate)
+        emit_event('Sign in link sent via signup form', candidate: @sign_up_form.candidate)
         add_identity_to_log @sign_up_form.candidate.id
         candidate = Candidate.find(@sign_up_form.candidate.id)
         candidate.update!(course_from_find_id: @sign_up_form.course_from_find_id)
         redirect_to candidate_interface_check_email_sign_up_path
       elsif @sign_up_form.save
         CandidateInterface::RequestMagicLink.for_sign_up(candidate: @sign_up_form.candidate)
+        emit_event('Sign up link sent', candidate: @sign_up_form.candidate)
         add_identity_to_log @sign_up_form.candidate.id
         redirect_to candidate_interface_check_email_sign_up_path
       else

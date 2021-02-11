@@ -8,6 +8,10 @@ module CandidateInterface
     layout 'application'
     alias_method :audit_user, :current_candidate
 
+    def emit_event(name, candidate: nil)
+      AnalyticsEvent.emit(name, candidate: candidate, session: session)
+    end
+
     def add_identity_to_log(candidate_id = current_candidate&.id)
       RequestLocals.store[:identity] = { candidate_id: candidate_id }
       Raven.user_context(id: "candidate_#{candidate_id}")
