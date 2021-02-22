@@ -172,11 +172,18 @@ module VendorAPI
 
     def qualifications
       {
+        a_levels: format_a_levels,
         gcses: format_gcses,
         degrees: qualifications_of_level('degree').map { |q| qualification_to_hash(q) },
-        other_qualifications: qualifications_of_level('other').map { |q| qualification_to_hash(q) },
+        other_qualifications: qualifications_of_level('other').reject(qualification_type: 'A level').map { |q| qualification_to_hash(q) },
         missing_gcses_explanation: application_choice.missing_gcses_explanation(separator_string: "\n\n"),
       }
+    end
+
+    def format_a_levels
+      a_levels = other_qualifications_of_type('A level').reject(&:missing_qualification?)
+
+      a_levels.map { |q| qualification_to_hash(q) }
     end
 
     def format_gcses
@@ -200,6 +207,14 @@ module VendorAPI
       # .gcses .degrees etc
       application_form.application_qualifications.select do |q|
         q.level == level
+      end
+    end
+
+    def other_qualifications_of_type(type)
+      qualifications_of_level('other').select do |q|
+        q.qualification_type == type
+        # Occurances of 'A Level' until 06 Nov 2020
+        # [type, type.titleize].include?(q.qualification_type)
       end
     end
 
