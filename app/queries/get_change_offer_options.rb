@@ -7,9 +7,17 @@ class GetChangeOfferOptions
   end
 
   def available_providers
+    make_decision_providers = user.provider_permissions.where(make_decisions: true).map(&:provider)
     courses = Course.where(open_on_apply: true,
-                          provider: user.providers,
-                          recruitment_cycle_year: application_choice.offered_course.recruitment_cycle_year,)
+                          provider: make_decision_providers,
+                          recruitment_cycle_year: application_choice.offered_course.recruitment_cycle_year,
+                           )
+                          .or(
+                              Course.where(open_on_apply: true,
+                              accredited_provider: make_decision_providers,
+                              recruitment_cycle_year: application_choice.offered_course.recruitment_cycle_year,)
+                            )
+    courses.map(&:provider)
   end
 
   #   @available_courses = Course.where(
