@@ -37,10 +37,16 @@ module ProviderInterface
     def update_from_params(hash)
       self.view_applications_only = ActiveModel::Type::Boolean.new.cast(hash[:view_applications_only])
 
+      selected_permissions = hash[:permissions].select(&:present?)
+
       ProviderPermissions::VALID_PERMISSIONS.each do |permission_name|
-        permission_value = view_applications_only ? false : hash.fetch(permission_name, false)
+        permission_value = view_applications_only ? false : selected_permissions.include?(permission_name.to_s)
         send("#{permission_name}=", permission_value)
       end
+    end
+
+    def permissions
+      ProviderPermissions::VALID_PERMISSIONS.select { |permission| send(permission) }
     end
 
     def save
@@ -58,15 +64,8 @@ module ProviderInterface
     def at_least_one_extra_permission_is_set_if_necessary
       return if view_applications_only
 
-      extra_permissions = [
-        manage_organisations,
-        manage_users,
-        make_decisions,
-        view_safeguarding_information,
-        view_diversity_information,
-      ]
-
-      if extra_permissions.none?
+      selected_extra_permissions = ProviderPermissions::VALID_PERMISSIONS.map { |permission| send(permission) }
+      if selected_extra_permissions.none?
         errors[:permissions] << 'Select extra permissions'
       end
     end
