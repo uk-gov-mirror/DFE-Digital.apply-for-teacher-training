@@ -1,81 +1,91 @@
 require 'rails_helper'
 
 RSpec.describe ProviderInterface::ProviderUserPermissionsForm do
-  let(:provider_permissions) { create(:provider_permissions) }
+  let(:provider) { create(:provider) }
+  let(:provider_user) { create(:provider_user, providers: [provider]) }
+  let(:view_applications_only) { true }
+  let(:permissions) { [] }
+  let(:form_params) do
+    {
+      provider: provider,
+      provider_user: provider_user,
+      view_applications_only: view_applications_only,
+      permissions: permissions,
+    }
+  end
 
   describe 'validations' do
-    it 'is valid when model is set' do
-      expect(described_class.from(provider_permissions)).to be_valid
-    end
+    it { is_expected.to validate_presence_of(:provider) }
+    it { is_expected.to validate_presence_of(:provider_user) }
+    it { is_expected.to validate_presence_of(:view_applications_only) }
 
-    it 'is invalid without a model' do
-      expect(described_class.new).to be_invalid
+    describe '#at_least_one_extra_permission_is_set' do
+      context 'when view_applications_only is true' do
+        it 'does not validate that extra permissions are set' do
+          expect(described_class.build_from_params(form_params)).to be_valid
+        end
+      end
+
+      context 'when view_applications_only is false' do
+        let(:view_applications_only) { false }
+
+        it 'validates that extra permissions are set' do
+          model = described_class.build_from_params(form_params)
+          expect(model).to be_invalid
+          expect(model.errors[:permissions]).to contain_exactly('Select extra permissions')
+        end
+      end
     end
   end
 
-  describe '#from' do
+  describe '#build_from_model' do
+    let(:provider_permissions) { create(:provider_permissions, make_decisions: true, view_diversity_information: true) }
+
     it 'generates a form object set to the model\'s permissions' do
-      provider_permissions.update(make_decisions: true)
-      form = described_class.from(provider_permissions)
+      form = described_class.build_from_model(provider_permissions)
 
-      expect(form.manage_organisations).to be_falsy
-      expect(form.manage_users).to be_falsy
-      expect(form.view_safeguarding_information).to be_falsy
-      expect(form.make_decisions).to be_truthy
+      expect(form.permissions).not_to include 'manage_organisations'
+      expect(form.permissions).not_to include 'manage_users'
+      expect(form.permissions).not_to include 'view_safeguarding_information'
+      expect(form.permissions).to include 'view_diversity_information'
+      expect(form.permissions).to include 'make_decisions'
+
+      expect(form.view_applications_only).to eq(false)
+    end
+
+    context 'when no extra permissions are set on the model' do
+      let(:provider_permissions) { create(:provider_permissions) }
+
+      it 'sets view_applications_only to true' do
+        form = described_class.build_from_model(provider_permissions)
+
+        expect(form.permissions).to be_empty
+        expect(form.view_applications_only).to eq(true)
+      end
     end
   end
 
-  describe '#update_from_params' do
-    it 'changes the form object permissions to match a hash' do
-      form = described_class.new(
-        manage_organisations: false,
-        manage_users: true,
-        view_safeguarding_information: false,
-        make_decisions: true,
-      )
+  describe '#build_from_params' do
+    let(:permissions) { %w[manage_organisations manage_users make_decisions] }
 
-      form.update_from_params view_safeguarding_information: true, manage_users: false
+    context 'when view_applications_only is false' do
+      let(:view_applications_only) { false }
 
-      expect(form.manage_organisations).to be_falsy
-      expect(form.manage_users).to be_falsy
-      expect(form.view_safeguarding_information).to be_truthy
-      expect(form.make_decisions).to be_falsy
+      it 'generates a form object set to the permissions from the params' do
+        form = described_class.build_from_params(form_params)
+
+        expect(form.permissions).to match_array(permissions)
+      end
     end
 
-    it 'disables form object permissions when form is passed view_applications_only param' do
-      form = described_class.new(
-        manage_organisations: true,
-        manage_users: true,
-        view_safeguarding_information: false,
-        make_decisions: true,
-      )
+    context 'when view_applications_only is true' do
+      let(:view_applications_only) { true }
 
-      form.update_from_params view_safeguarding_information: true, manage_users: false, view_applications_only: true
+      it 'ignores any permissions passed to the form in the params' do
+        form = described_class.build_from_params(form_params)
 
-      expect(form.manage_organisations).to be_falsy
-      expect(form.manage_users).to be_falsy
-      expect(form.view_safeguarding_information).to be_falsy
-      expect(form.make_decisions).to be_falsy
-    end
-  end
-
-  describe '#save' do
-    it 'updates and associated model with current form permissions' do
-      provider_permissions.update(make_decisions: true)
-      form = described_class.from(provider_permissions)
-
-      form.view_safeguarding_information = true
-      form.make_decisions = false
-
-      form.save
-      expect(provider_permissions.view_safeguarding_information).to be_truthy
-      expect(provider_permissions.make_decisions).to be_falsy
-    end
-
-    it 'returns nil if there is no associated model' do
-      form = described_class.new
-      form.view_safeguarding_information = true
-      expect(form.save).to be_nil
+        expect(form.permissions).to be_empty
+      end
     end
   end
 end
