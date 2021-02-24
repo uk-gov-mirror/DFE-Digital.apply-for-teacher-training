@@ -22,7 +22,10 @@ class GetChangeOfferOptions
   end
 
   def available_providers
-    actionable_courses.map(&:provider)
+    Provider
+      .with(actionable_courses: actionable_courses)
+      .joins('INNER JOIN actionable_courses ON providers.id = actionable_courses.provider_id')
+      .distinct
   end
 
   # GetChangeOfferOptions.new(application_choice: ..., user: ...).available_courses(provider: ...)
