@@ -40,10 +40,6 @@ gem 'json_api_client'
 # This gem adds support for sequences in the schema.rb
 gem 'ar-sequence'
 
-# Allows us to use common table expressions / WITH statements
-# in active record queries; may eventually be merged into Rails
-gem 'activerecord-cte'
-
 gem 'sentry-raven'
 
 gem 'factory_bot_rails'
