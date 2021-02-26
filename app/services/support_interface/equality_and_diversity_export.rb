@@ -14,9 +14,9 @@ module SupportInterface
           'First rejection reason' => rejected_application_choices[0]&.rejection_reason,
           'Second rejection reason' => rejected_application_choices[1]&.rejection_reason,
           'Third rejection reason' => rejected_application_choices[2]&.rejection_reason,
-          'First structured rejection reasons' => FlatReasonsForRejectionExtract.new(rejected_application_choices[0]&.structured_rejection_reasons).format_structured_rejection_reasons,
-          'Second structured rejection reasons' => FlatReasonsForRejectionExtract.new(rejected_application_choices[1]&.structured_rejection_reasons).format_structured_rejection_reasons,
-          'Third structured rejection reasons' => FlatReasonsForRejectionExtract.new(rejected_application_choices[2]&.structured_rejection_reasons).format_structured_rejection_reasons,
+          'First structured rejection reasons' => FlatReasonsForRejectionExtract.new(rejected_application_choices[0]&.structured_rejection_reasons).formatted,
+          'Second structured rejection reasons' => FlatReasonsForRejectionExtract.new(rejected_application_choices[1]&.structured_rejection_reasons).formatted,
+          'Third structured rejection reasons' => FlatReasonsForRejectionExtract.new(rejected_application_choices[2]&.structured_rejection_reasons).formatted,
         }
 
         disabilities = application_form.equality_and_diversity['disabilities']
