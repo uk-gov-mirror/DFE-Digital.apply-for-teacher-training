@@ -69,6 +69,54 @@ class FlatReasonsForRejectionExtract
     other_detail_or_what_to_improve('qualifications_other_details')
   end
 
+  def performance_at_interview?
+    top_level_reasons('performance_at_interview_y_n')
+  end
+
+  def performance_at_interview_what_to_improve
+    other_detail_or_what_to_improve('performance_at_interview_what_to_improve')
+  end
+
+  def course_full?
+    top_level_reasons('course_full_y_n')
+  end
+
+  def offered_on_another_course?
+    top_level_reasons('offered_on_another_course_y_n')
+  end
+
+  def honesty_and_professionalism?
+    top_level_reasons('honesty_and_professionalism_y_n')
+  end
+
+  def information_false_or_inaccurate?
+    sub_level_reasons('honesty_and_professionalism_concerns', 'information_false_or_inaccurate')
+  end
+
+  def plagiarism?
+    sub_level_reasons('honesty_and_professionalism_concerns', 'plagiarism')
+  end
+
+  def references?
+    sub_level_reasons('honesty_and_professionalism_concerns', 'references')
+  end
+
+  def honesty_and_professionalism_concerns_information_false_or_inaccurate_details
+    other_detail_or_what_to_improve('honesty_and_professionalism_concerns_information_false_or_inaccurate_details')
+  end
+
+  def honesty_and_professionalism_concerns_plagiarism_details
+    other_detail_or_what_to_improve('honesty_and_professionalism_concerns_plagiarism_details')
+  end
+
+  def honesty_and_professionalism_concerns_references_details
+    other_detail_or_what_to_improve('honesty_and_professionalism_concerns_references_details')
+  end
+
+  def honesty_and_professionalism_concerns_other_details
+    other_detail_or_what_to_improve('honesty_and_professionalism_concerns_other_details')
+  end
+
 
 
   # These three methods are copied from the application_choices_export.rb .... currently doesn't provide enough granularity
