@@ -117,7 +117,29 @@ class FlatReasonsForRejectionExtract
     other_detail_or_what_to_improve('honesty_and_professionalism_concerns_other_details')
   end
 
+  def safeguarding?
+    top_level_reasons('safeguarding_y_n')
+  end
 
+  def candidate_disclosed_information?
+    sub_level_reasons('safeguarding_concerns', 'candidate_disclosed_information')
+  end
+
+  def safeguarding_concerns_candidate_disclosed_information_details
+    other_detail_or_what_to_improve('safeguarding_concerns_candidate_disclosed_information_details')
+  end
+
+  def vetting_disclosed_information?
+    sub_level_reasons('safeguarding_concerns', 'vetting_disclosed_information')
+  end
+
+  def safeguarding_concerns_vetting_disclosed_information_details
+    other_detail_or_what_to_improve('safeguarding_concerns_vetting_disclosed_information_details')
+  end
+
+  def safeguarding_concerns_other_details
+    other_detail_or_what_to_improve('safeguarding_concerns_other_details')
+  end
 
   # These three methods are copied from the application_choices_export.rb .... currently doesn't provide enough granularity
   def format_structured_rejection_reasons
