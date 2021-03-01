@@ -118,4 +118,40 @@ class ReasonsForRejection
   def to_prose
     safeguarding_y_n.to_s
   end
+
+  INITIAL_TOP_LEVEL_QUESTIONS.each do |reason|
+    define_method(reason.to_s.gsub(/_y_n$/, '?')) do
+      self.send(reason) == 'Yes'
+    end
+
+    define_method(reason.to_s.gsub(/_y_n$/, '?=')) do |value|
+      self.send(
+        "#{reason}=",
+        value ? 'Yes' : 'No',
+      )
+    end
+  end
+
+  ALL_QUESTIONS.each do |reason, sub_reasons|
+    sub_reasons.each do |sub_reason|
+      ReasonsForRejectionCountQuery::TOP_LEVEL_REASONS_TO_SUB_REASONS.each do |reason, sub_reason|
+        ReasonsForRejectionCountQuery::SUBREASON_VALUES[reason.to_sym].each do |sub_reason_value|
+          define_method("#{reason.to_s.gsub(/_y_n$/, '')}_#{sub_reason_value}?") do
+            self.send(sub_reason).include?(sub_reason_value.to_s)
+          end
+
+          define_method("#{reason.to_s.gsub(/_y_n$/, '')}_#{sub_reason_value}?=") do |value|
+            values = self.send(sub_reason)
+            if value
+              return if values.include?(sub_reason_value)
+
+              self.send("#{sub_reason}=", values << sub_reason_value)
+            else
+              self.send("#{sub_reason}=", values.except(sub_reason_value))
+            end
+          end
+        end
+      end
+    end
+  end
 end
