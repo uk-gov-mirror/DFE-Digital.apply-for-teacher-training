@@ -1005,6 +1005,24 @@ FactoryBot.define do
     provider_user
   end
 
+  factory :provider_user_notification do
+    provider_user
+
+    application_received { true }
+    application_withdrawn { true }
+    application_rejected_by_default { true }
+    offer_accepted { true }
+    offer_declined { true }
+
+    trait :all_off do
+      application_received { false }
+      application_withdrawn { false }
+      application_rejected_by_default { false }
+      offer_accepted { false }
+      offer_declined { false }
+    end
+  end
+
   factory :validation_error do
     form_object { 'RefereeInterface::ReferenceFeedbackForm' }
     details { { feedback: { messages: ['Enter feedback'], value: '' } } }
