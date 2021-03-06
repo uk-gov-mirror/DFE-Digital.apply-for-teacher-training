@@ -8,8 +8,6 @@ class Clock
 
   error_handler { |error| Raven.capture_exception(error) if defined? Raven }
 
-  every(15.minutes, 'SyncAllFromFind') { SyncAllFromFind.perform_async }
-
   every(1.hour, 'DetectInvariants') { DetectInvariants.perform_async }
   every(1.hour, 'RejectApplicationsByDefault', at: '**:10') { RejectApplicationsByDefaultWorker.perform_async }
   every(1.hour, 'DeclineOffersByDefault', at: '**:15') { DeclineOffersByDefaultWorker.perform_async }
@@ -42,7 +40,7 @@ class Clock
     end
   end
 
-  every(1.hour, 'SyncAllFromTeacherTrainingPublicAPI') do
+  every(15.minutes, 'SyncAllFromTeacherTrainingPublicAPI') do
     if FeatureFlag.active?(:sync_from_public_teacher_training_api)
       TeacherTrainingPublicAPI::SyncAllProvidersAndCoursesWorker.perform_async
     end
