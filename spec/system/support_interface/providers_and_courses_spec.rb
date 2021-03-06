@@ -2,7 +2,6 @@ require 'rails_helper'
 
 RSpec.feature 'Providers and courses' do
   include DfESignInHelpers
-  include FindAPIHelper
   include TeacherTrainingPublicAPIHelper
 
   scenario 'User syncs provider and browses providers' do
