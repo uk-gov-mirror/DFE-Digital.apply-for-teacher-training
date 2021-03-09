@@ -35,6 +35,8 @@ module APIDocs
   class Response
     attr_reader :code, :response
 
+    RESPONSES_WITH_SCHEMAS = ['application/json', 'text/csv'].freeze
+
     delegate :description, :content, to: :response
 
     def initialize(code, response)
@@ -43,20 +45,25 @@ module APIDocs
     end
 
     def example
-      return unless response.content['application/json']
+      return unless RESPONSES_WITH_SCHEMAS.include?(mime_type)
 
-      response.content['application/json']['example'] || SchemaExample.new(schema).as_json
+      response.content[mime_type]['example'] || SchemaExample.new(schema).as_json
     end
 
     def schema
-      return unless response.content['application/json']
 
-      response.content['application/json'].schema
+      return unless RESPONSES_WITH_SCHEMAS.include?(mime_type)
+
+      response.content.values.first.schema
     end
 
     def schema_name
       location = schema.node_context.source_location.to_s
       location.gsub(/#\/components\/schemas\//, '')
+    end
+
+    def mime_type
+      response.content.keys.first
     end
   end
 

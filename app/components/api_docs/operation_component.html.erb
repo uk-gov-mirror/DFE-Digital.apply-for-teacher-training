@@ -78,8 +78,12 @@
       <div class="govuk-details__text">
         This request will return a <%= govuk_link_to response.schema_name, "##{response.schema_name.parameterize}-object" %> object.
 
-        <% if response.example %>
-          <%= json_code_sample(response.example) %>
+          <% if response.example %>
+            <% if response.mime_type == 'application/json' %>
+              <%= json_code_sample(response.example) %>
+            <% elsif response.mime_type == 'text/csv' %>
+              <%= csv_sample(response.example) %>
+            <% end %>
         <% end %>
       </div>
     </details>
