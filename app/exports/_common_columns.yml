@@ -210,3 +210,5 @@ course_code:
 nctl_subject:
   type: array
   maxLength: 255
+  items:
+    type: string
