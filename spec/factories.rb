@@ -1005,7 +1005,7 @@ FactoryBot.define do
     provider_user
   end
 
-  factory :provider_user_notification do
+  factory :provider_user_notification_preferences do
     provider_user
 
     application_received { true }
