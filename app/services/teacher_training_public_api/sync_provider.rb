@@ -5,8 +5,9 @@ module TeacherTrainingPublicAPI
       @recruitment_cycle_year = recruitment_cycle_year
     end
 
-    def call(run_in_background: true, force_sync_courses: false)
+    def call(run_in_background: true, force_sync_courses: false, full_sync: false)
       @force_sync_courses = force_sync_courses
+      @full_sync = full_sync
 
       provider_attrs = if existing_provider
                          provider_attrs_from(@provider_from_api)

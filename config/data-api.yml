@@ -26,8 +26,30 @@ paths:
             text/csv:
               schema:
                 "$ref": "#/components/schemas/TADCSVSchema"
+  "/tad-data-exports":
+    get:
+      summary: Get a list of TAD data exports
+      description: |
+        This endpoint returns a list of the last 10 TAD Data exports
+      responses:
+        '200':
+          description: An array of TADExport objects
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/TADExportList"
 components:
   schemas:
+    TADExport:
+      type: object
+      properties:
+        data:
+    TADExportList:
+      properties:
+        data:
+          type: array
+          items:
+            "$ref": "#/components/schemas/TADExport"
     TADCSVSchema:
       type: object
       properties: # this is automatically populated from the CSV definition by DataAPISpecification
