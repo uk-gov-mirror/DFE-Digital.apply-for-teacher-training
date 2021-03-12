@@ -13,9 +13,9 @@ RSpec.describe CandidateInterface::PersonalDetailsForm, type: :model do
     {
       first_name: data[:first_name],
       last_name: data[:last_name],
-      day: data[:date_of_birth].day,
-      month: data[:date_of_birth].month,
-      year: data[:date_of_birth].year,
+      'date_of_birth(3i)' =>  data[:date_of_birth].day,
+      'date_of_birth(2i)' =>  data[:date_of_birth].month,
+      'date_of_birth(1i)' =>  data[:date_of_birth].year,
     }
   end
 
@@ -62,7 +62,7 @@ RSpec.describe CandidateInterface::PersonalDetailsForm, type: :model do
     it { is_expected.to validate_length_of(:last_name).is_at_most(60) }
 
     describe 'date of birth' do
-      let(:model) { described_class.new(day: day, month: month, year: year) }
+      let(:model) { described_class.new(date_of_birth: date_of_birth) }
 
       include_examples 'date_of_birth validations', verify_presence: true
     end
