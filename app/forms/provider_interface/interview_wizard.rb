@@ -1,16 +1,12 @@
 module ProviderInterface
   class InterviewWizard
     include ActiveModel::Model
-    include ActiveModel::Attributes
+    include DateField
 
     VALID_TIME_FORMAT = /^(1[0-2]|0?[1-9])([:\.\s]([0-5][0-9]))?([AaPp][Mm])$/.freeze
 
     attr_accessor :time, :location, :additional_details, :provider_id, :application_choice, :provider_user, :current_step
-    attr_writer :date
-
-    attribute 'date(3i)', :string
-    attribute 'date(2i)', :string
-    attribute 'date(1i)', :string
+    date_field :date
 
     validates :provider_user, :application_choice, presence: true
     validates :date, date: { presence: true }
@@ -27,18 +23,6 @@ module ProviderInterface
       @state_store = state_store
 
       super(last_saved_state.deep_merge(attrs))
-    end
-
-    def date
-      day = send('date(3i)')
-      month = send('date(2i)')
-      year = send('date(1i)')
-
-      begin
-        @date = Date.new(year.to_i, month.to_i, day.to_i)
-      rescue ArgumentError
-        @date = Struct.new(:day, :month, :year).new(day, month, year)
-      end
     end
 
     def date_and_time
