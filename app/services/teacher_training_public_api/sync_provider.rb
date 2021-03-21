@@ -5,7 +5,7 @@ module TeacherTrainingPublicAPI
       @recruitment_cycle_year = recruitment_cycle_year
     end
 
-    def call(run_in_background: true, force_sync_courses: false)
+    def call(run_in_background: true, force_sync_courses: false, only_changed_courses: true)
       @force_sync_courses = force_sync_courses
 
       provider_attrs = if existing_provider
@@ -17,15 +17,15 @@ module TeacherTrainingPublicAPI
                        end
 
       provider = create_or_update_provider(provider_attrs)
-      sync_courses(run_in_background, provider)
+      sync_courses(run_in_background, provider, only_changed_courses)
     end
 
-    def sync_courses(run_in_background, provider)
+    def sync_courses(run_in_background, provider, only_changed_courses)
       if sync_courses?
         if run_in_background
-          TeacherTrainingPublicAPI::SyncCourses.perform_async(provider.id, @recruitment_cycle_year)
+          TeacherTrainingPublicAPI::SyncCourses.perform_async(provider.id, @recruitment_cycle_year, only_changed_courses: only_changed_courses)
         else
-          TeacherTrainingPublicAPI::SyncCourses.new.perform(provider.id, @recruitment_cycle_year, run_in_background: false)
+          TeacherTrainingPublicAPI::SyncCourses.new.perform(provider.id, @recruitment_cycle_year, run_in_background: false, only_changed_courses: only_changed_courses)
         end
       end
     end

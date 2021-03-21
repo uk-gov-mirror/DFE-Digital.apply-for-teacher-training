@@ -5,16 +5,22 @@ module TeacherTrainingPublicAPI
     include Sidekiq::Worker
     sidekiq_options retry: 3, queue: :low_priority
 
-    def perform(provider_id, recruitment_cycle_year, run_in_background: true)
+    def perform(provider_id, recruitment_cycle_year, run_in_background: true, only_changed_courses: true)
       @provider = ::Provider.find(provider_id)
       @run_in_background = run_in_background
 
-      TeacherTrainingPublicAPI::Course.where(
+      course_query = {
         year: recruitment_cycle_year,
         provider_code: @provider.code,
-      ).paginate(per_page: 500).each do |course_from_api|
-        create_or_update_course(course_from_api, recruitment_cycle_year)
-      end
+      }
+
+      course_query[:updated_since] = 1.hour.ago.iso8601 if only_changed_courses
+
+      TeacherTrainingPublicAPI::Course
+        .where(course_query)
+        .paginate(per_page: 500).each do |course_from_api|
+          create_or_update_course(course_from_api, recruitment_cycle_year)
+        end
     rescue JsonApiClient::Errors::ApiError
       raise TeacherTrainingPublicAPI::SyncError
     end
