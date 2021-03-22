@@ -4,18 +4,21 @@ RSpec.feature 'Provider makes an offer' do
   include DfESignInHelpers
   include ProviderUserPermissionsHelper
 
-  let(:provider_user) { create(:provider_user, :with_dfe_sign_in) }
+  let(:provider_user) { create(:provider_user, :with_dfe_sign_in, :with_make_decisions) }
   let(:provider) { provider_user.providers.first }
   let(:application_form) { build(:application_form, :minimum_info) }
+  let(:ratifying_provider){ create(:provider, :with_signed_agreement) }
   let!(:application_choice) do
     create(:application_choice, :awaiting_provider_decision,
            application_form: application_form,
            course_option: course_option)
   end
-  let(:course) { build(:course, :open_on_apply, :full_time, provider: provider) }
+  let(:course) { build(:course, :open_on_apply, :full_time, provider: provider, accredited_provider: ratifying_provider ) }
   let(:course_option) { build(:course_option, course: course) }
 
   before do
+    ratifying_provider.provider_users << provider_user
+    provider_user.provider_permissions.update_all(make_decisions: true)
     FeatureFlag.activate(:updated_offer_flow)
   end
 
@@ -55,6 +58,7 @@ RSpec.feature 'Provider makes an offer' do
     and_i_can_confirm_the_new_study_mode_selection
     and_i_can_confirm_the_new_location_selection
 
+    save_and_open_page
     when_i_click_change_provider
     then_i_am_taken_to_the_change_provider_page
 
@@ -196,8 +200,7 @@ RSpec.feature 'Provider makes an offer' do
   end
 
   def given_the_provider_user_can_offer_multiple_provider_courses
-    @available_provider = create(:provider, :with_signed_agreement)
-    create(:provider_permissions, provider: @available_provider, provider_user: provider_user, make_decisions: true)
+    @available_provider = ratifying_provider
     courses = [create(:course, :open_on_apply, study_mode: :full_time_or_part_time, provider: @available_provider),
                create(:course, :open_on_apply, study_mode: :full_time_or_part_time, provider: @available_provider)]
     @selected_provider_available_course = courses.sample

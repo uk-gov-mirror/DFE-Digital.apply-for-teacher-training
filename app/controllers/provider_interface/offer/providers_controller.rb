@@ -5,7 +5,7 @@ module ProviderInterface
         @wizard = OfferWizard.new(offer_store, { decision: 'change_offer', current_step: 'providers', action: action })
         @wizard.save_state!
 
-        @providers = available_providers
+        @providers = available_providers(course: @wizard.course_option.course)
       end
 
       def create
@@ -16,7 +16,7 @@ module ProviderInterface
 
           redirect_to [:new, :provider_interface, @application_choice, :offer, @wizard.next_step]
         else
-          @providers = available_providers
+          @providers = available_providers(course: @wizard.course_option.course)
 
           render :new
         end

@@ -45,8 +45,8 @@ module ProviderInterface
       'back' if !!params[:back]
     end
 
-    def available_providers
-      current_provider_user.providers
+    def available_providers(course)
+      GetChangeOfferOptions.new(user: current_provider_user, current_course: course).available_providers.to_a
     end
 
     def available_courses(provider_id)
