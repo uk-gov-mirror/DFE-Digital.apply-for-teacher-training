@@ -32,6 +32,8 @@ module ProviderInterface
       !@current_provider_user.nil? ? @current_provider_user : @current_provider_user = (ProviderUser.load_from_session(session) || false)
     end
 
+    alias_method :current_user, :current_provider_user
+
     def check_cookie_preferences
       @google_analytics_id = ENV.fetch('GOOGLE_ANALYTICS_MANAGE', '') if cookies['consented-to-manage-cookies'].eql?('yes')
     end
