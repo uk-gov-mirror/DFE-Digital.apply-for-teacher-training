@@ -39,7 +39,7 @@ module ApplicationHelper
     section = request.path.split('/').second
     if section == 'api-docs'
       'api_docs'
-    else
+    elsif section.present?
       "#{section}_interface"
     end
   end
