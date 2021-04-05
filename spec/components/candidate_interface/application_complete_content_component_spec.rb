@@ -1,11 +1,13 @@
 require 'rails_helper'
 
 RSpec.describe CandidateInterface::ApplicationCompleteContentComponent do
-  let(:submitted_at) { Time.zone.local(2019, 10, 22, 12, 0, 0) }
-  let(:first_january_2020) { Time.zone.local(2020, 1, 1, 12, 0, 0) }
+  let(:reject_by_default_limit) { TimeLimitConfig.limits_for(:reject_by_default).first.limit }
+  let(:reject_by_default_at) { reject_by_default_limit.business_days.from_now }
+  let(:decline_by_default_limit) { TimeLimitConfig.limits_for(:decline_by_default).first.limit }
+  let(:decline_by_default_at) { decline_by_default_limit.business_days.from_now }
 
   around do |example|
-    Timecop.freeze(submitted_at) do
+    Timecop.freeze do
       example.run
     end
   end
@@ -18,7 +20,7 @@ RSpec.describe CandidateInterface::ApplicationCompleteContentComponent do
       render_result = render_inline(described_class.new(application_form: application_form))
 
       expect(render_result.text).not_to include(t('application_complete.dashboard.edit_link'))
-      expect(render_result.text).to include(t('application_complete.dashboard.providers_respond_by', date: '1 January 2020'))
+      expect(render_result.text).to include(t('application_complete.dashboard.providers_respond_by', date: reject_by_default_at.to_s(:govuk_date)))
     end
   end
 
@@ -30,11 +32,13 @@ RSpec.describe CandidateInterface::ApplicationCompleteContentComponent do
       render_result = render_inline(described_class.new(application_form: application_form))
 
       expect(render_result.text).to include(t('application_complete.dashboard.some_provider_decisions_made'))
-      expect(render_result.text).to include(t('application_complete.dashboard.providers_respond_by', date: '1 January 2020'))
+      expect(render_result.text).to include(t('application_complete.dashboard.providers_respond_by', date: reject_by_default_at.to_s(:govuk_date)))
     end
   end
 
   context 'when the application has all decisions from providers' do
+    let(:remaining_days) { (decline_by_default_at.to_date - Date.current).to_i }
+
     it 'renders with all providers have made a decision content if all offers' do
       stub_application_dates_with_form
       application_form = create_application_form_with_course_choices(statuses: %w[offer offer])
@@ -42,7 +46,7 @@ RSpec.describe CandidateInterface::ApplicationCompleteContentComponent do
       render_result = render_inline(described_class.new(application_form: application_form))
 
       expect(render_result.text).to include(t('application_complete.dashboard.all_provider_decisions_made', count: 2))
-      expect(render_result.text).to include(t('application_complete.dashboard.candidate_respond_by', remaining_days: '14', date: '5 November 2019'))
+      expect(render_result.text).to include(t('application_complete.dashboard.candidate_respond_by', remaining_days: remaining_days, date: decline_by_default_at.to_s(:govuk_date)))
     end
 
     it 'renders with all providers have made a decision content if an offer and rejected' do
@@ -52,7 +56,7 @@ RSpec.describe CandidateInterface::ApplicationCompleteContentComponent do
       render_result = render_inline(described_class.new(application_form: application_form))
 
       expect(render_result.text).to include(t('application_complete.dashboard.all_provider_decisions_made', count: 2))
-      expect(render_result.text).to include(t('application_complete.dashboard.candidate_respond_by', remaining_days: '14', date: '5 November 2019'))
+      expect(render_result.text).to include(t('application_complete.dashboard.candidate_respond_by', remaining_days: remaining_days, date: decline_by_default_at.to_s(:govuk_date)))
     end
 
     it 'renders when all offers have been withdrawn' do
@@ -127,8 +131,8 @@ RSpec.describe CandidateInterface::ApplicationCompleteContentComponent do
   def stub_application_dates_with_form
     application_dates = instance_double(
       ApplicationDates,
-      reject_by_default_at: first_january_2020,
-      decline_by_default_at: 10.business_days.after(submitted_at),
+      reject_by_default_at: reject_by_default_at,
+      decline_by_default_at: decline_by_default_at,
     )
     allow(ApplicationDates).to receive(:new).and_return(application_dates)
   end
@@ -140,7 +144,7 @@ RSpec.describe CandidateInterface::ApplicationCompleteContentComponent do
         :application_choice,
         application_form: application_form,
         status: status,
-        reject_by_default_at: first_january_2020,
+        reject_by_default_at: reject_by_default_at,
       )
     end
 
