@@ -64,14 +64,20 @@ class ApplicationChoice < ApplicationRecord
   end
 
   def days_left_to_respond
-    if respond_to?(:pg_days_left_to_respond)
-      # pre-computed by sorting query
-      return pg_days_left_to_respond
-    end
-
-    if status == 'awaiting_provider_decision'
+    # if respond_to?(:pg_days_left_to_respond)
+    #   # pre-computed by sorting query
+    #   return pg_days_left_to_respond
+    # end
+    if ApplicationStateChange::DECISION_PENDING_STATUSES.include?(status.to_sym)
       rbd = reject_by_default_at
       ((rbd - Time.zone.now) / 1.day).floor if rbd && rbd > Time.zone.now
+    end
+  end
+
+  def days_until_decline_by_default
+    if status == 'offer'
+      dbd = decline_by_default_at
+      ((dbd - Time.zone.now) / 1.day).floor if dbd && dbd > Time.zone.now
     end
   end
 
