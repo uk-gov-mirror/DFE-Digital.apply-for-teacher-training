@@ -4,8 +4,7 @@ RSpec.feature 'Receives rejection email' do
   include CandidateHelper
 
   around do |example|
-    date_that_avoids_clocks_changing_by_ten_days = Time.zone.local(2020, 1, 13)
-    Timecop.freeze(date_that_avoids_clocks_changing_by_ten_days) do
+    Timecop.freeze do
       example.run
     end
   end
@@ -53,7 +52,7 @@ RSpec.feature 'Receives rejection email' do
     @offer = create(:application_choice,
                     status: :offer,
                     application_form: @application_form,
-                    decline_by_default_at: 10.business_days.from_now,
+                    decline_by_default_at: 10.business_days.from_now.midday,
                     decline_by_default_days: 10)
     @application_choice = create(:application_choice, status: :awaiting_provider_decision, application_form: @application_form)
   end
@@ -63,7 +62,7 @@ RSpec.feature 'Receives rejection email' do
     @offer = create(:application_choice,
                     status: :offer,
                     application_form: @application_form,
-                    decline_by_default_at: 10.business_days.from_now,
+                    decline_by_default_at: 10.business_days.from_now.midday,
                     decline_by_default_days: 10)
     @offer2 = create(:application_choice, status: :offer, application_form: @application_form)
     @application_choice = create(:application_choice, status: :awaiting_provider_decision, application_form: @application_form)
