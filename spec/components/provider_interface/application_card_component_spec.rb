@@ -106,7 +106,7 @@ RSpec.describe ProviderInterface::ApplicationCardComponent do
             first_name: 'Jim',
             last_name: 'James',
           ),
-          updated_at: Date.parse('25-03-2020'),
+          updated_at: 2.months.ago,
         )
       end
 
@@ -127,7 +127,7 @@ RSpec.describe ProviderInterface::ApplicationCardComponent do
       create(
         :application_choice,
         :awaiting_provider_decision,
-        updated_at: Time.zone.parse('2020-06-01T09:05:00+01:00'),
+        updated_at: 2.months.ago,
       )
     end
 
@@ -158,23 +158,19 @@ RSpec.describe ProviderInterface::ApplicationCardComponent do
     end
 
     context 'when 1 day is left to respond' do
-      let(:rbd) { 1.day.from_now }
+      let(:rbd) { 2.days.from_now.midday }
 
       it { is_expected.to eq('1 day to respond') }
     end
 
     context 'when 2 days are left to respond' do
-      let(:rbd) { 2.days.from_now }
+      let(:rbd) { 3.days.from_now.midday }
 
       it { is_expected.to eq('2 days to respond') }
     end
   end
 
   describe '#recruitment_cycle_text' do
-    around do |example|
-      Timecop.freeze { example.run }
-    end
-
     let(:current_year) { RecruitmentCycle.current_year }
 
     let(:course_option) { create(:course_option) }
