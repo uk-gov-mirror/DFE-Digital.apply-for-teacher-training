@@ -2,8 +2,8 @@
 # of editing this file, please use the migrations feature of Active Record to
 # incrementally modify your database, and then regenerate this schema definition.
 #
-# This file is the source Rails uses to define your schema when running `rails
-# db:schema:load`. When creating a new database, `rails db:schema:load` tends to
+# This file is the source Rails uses to define your schema when running `bin/rails
+# db:schema:load`. When creating a new database, `bin/rails db:schema:load` tends to
 # be faster and is potentially less error prone than running all of your
 # migrations from scratch. Old migrations may fail to apply correctly if those
 # migrations use external dependencies or application code.
@@ -43,13 +43,13 @@ ActiveRecord::Schema.define(version: 2021_04_12_130927) do
   create_sequence "other_efl_qualifications_id_seq"
   create_sequence "provider_agreements_id_seq"
   create_sequence "provider_relationship_permissions_id_seq"
-  create_sequence "providers_id_seq"
   create_sequence "provider_user_notifications_id_seq"
   create_sequence "provider_users_id_seq"
   create_sequence "provider_users_providers_id_seq"
-  create_sequence "qualifications_public_id_seq", start: 120000
-  create_sequence "references_id_seq"
+  create_sequence "providers_id_seq"
+  create_sequence "qualifications_public_id_seq", start: 272
   create_sequence "reference_tokens_id_seq"
+  create_sequence "references_id_seq"
   create_sequence "site_settings_id_seq"
   create_sequence "sites_id_seq"
   create_sequence "subjects_id_seq"
