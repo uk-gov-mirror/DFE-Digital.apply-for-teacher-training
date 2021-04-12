@@ -99,15 +99,15 @@ RSpec.describe ViewHelper, type: :helper do
       expect(helper.time_is_today_or_tomorrow?(Time.zone.now - 24.hours)).to be false
     end
 
-    it 'is not true for a time in 49 hours' do
-      expect(helper.time_is_today_or_tomorrow?(Time.zone.now - 49.hours)).to be false
+    it 'is not true for a time after tomorrow' do
+      expect(helper.time_is_today_or_tomorrow?(Time.zone.now + 49.hours)).to be false
     end
   end
 
   describe '#time_today_or_tomorrow' do
     it 'returns the time tomorrow for a time tomorrow' do
       time = Time.zone.tomorrow.midnight + 3.hours
-      expect(helper.time_today_or_tomorrow(time)).to eq '3am tomorrow'
+      expect(helper.time_today_or_tomorrow(time)).to eq '3am'
     end
 
     it 'returns the bare time for a time today' do
