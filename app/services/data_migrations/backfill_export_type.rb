@@ -1,7 +1,7 @@
 module DataMigrations
   class BackfillExportType
     TIMESTAMP = 20210326113829
-    MANUAL_RUN = false
+    MANUAL_RUN = true
 
     def change
       data_exports = DataExport.all.where(export_type: nil)
