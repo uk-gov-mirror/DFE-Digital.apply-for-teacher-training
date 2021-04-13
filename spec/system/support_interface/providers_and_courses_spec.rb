@@ -89,6 +89,8 @@ RSpec.feature 'Providers and courses' do
   end
 
   def and_i_click_the_sync_button
+    allow(TeacherTrainingPublicAPI::SyncSubjects).to receive(:perform_async)
+
     stub_teacher_training_api_providers(
       specified_attributes: [
         {

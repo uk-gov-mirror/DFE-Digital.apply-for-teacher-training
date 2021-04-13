@@ -33,6 +33,8 @@ RSpec.describe 'Sync provider', sidekiq: true do
   end
 
   def when_the_sync_runs
+    allow(TeacherTrainingPublicAPI::SyncSubjects).to receive(:perform_async)
+
     TeacherTrainingPublicAPI::SyncAllProvidersAndCoursesWorker.perform_async
   end
 

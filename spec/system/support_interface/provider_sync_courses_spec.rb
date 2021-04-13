@@ -69,6 +69,8 @@ RSpec.feature 'See provider course syncing' do
       course_code: 'ABC1',
     )
 
+    allow(TeacherTrainingPublicAPI::SyncSubjects).to receive(:perform_async)
+
     TeacherTrainingPublicAPI::SyncAllProvidersAndCoursesWorker.perform_async
 
     refresh

@@ -17,6 +17,8 @@ RSpec.describe 'Sync sites', sidekiq: true do
   end
 
   def given_there_are_2_sites_in_the_teacher_training_api
+    allow(TeacherTrainingPublicAPI::SyncSubjects).to receive(:perform_async)
+
     stub_teacher_training_api_providers(
       specified_attributes: [
         {
