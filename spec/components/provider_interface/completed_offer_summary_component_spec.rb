@@ -21,8 +21,8 @@ RSpec.describe ProviderInterface::CompletedOfferSummaryComponent do
     rows = {
       provider: 0,
       course: 1,
-      full_or_part_time: 2,
-      location: 3,
+      location: 2,
+      full_or_part_time: 3,
       accredited_provider: 4,
     }
 
@@ -72,7 +72,7 @@ RSpec.describe ProviderInterface::CompletedOfferSummaryComponent do
 
     it 'renders a change link' do
       study_mode_change_link = Rails.application.routes.url_helpers.edit_provider_interface_application_choice_offer_study_modes_path(application_choice)
-      expect(row_link_selector(2)).to eq(study_mode_change_link)
+      expect(row_link_selector(3)).to eq(study_mode_change_link)
     end
   end
 
@@ -80,7 +80,7 @@ RSpec.describe ProviderInterface::CompletedOfferSummaryComponent do
     let(:course) { build_stubbed(:course, study_mode: :full_time) }
 
     it 'renders no change link' do
-      expect(row_link_selector(2)).to eq(nil)
+      expect(row_link_selector(3)).to eq(nil)
     end
   end
 
@@ -89,7 +89,7 @@ RSpec.describe ProviderInterface::CompletedOfferSummaryComponent do
 
     it 'renders a change link' do
       course_options_change_link = Rails.application.routes.url_helpers.edit_provider_interface_application_choice_offer_locations_path(application_choice)
-      expect(row_link_selector(3)).to eq(course_options_change_link)
+      expect(row_link_selector(2)).to eq(course_options_change_link)
     end
   end
 
@@ -97,7 +97,7 @@ RSpec.describe ProviderInterface::CompletedOfferSummaryComponent do
     let(:course_options) { [build_stubbed(:course_option)] }
 
     it 'renders no change link' do
-      expect(row_link_selector(3)).to eq(nil)
+      expect(row_link_selector(2)).to eq(nil)
     end
   end
 
