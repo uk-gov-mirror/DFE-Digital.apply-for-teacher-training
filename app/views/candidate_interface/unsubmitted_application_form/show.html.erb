@@ -167,6 +167,14 @@
             completed: @application_form_presenter.becoming_a_teacher_completed?,
             path: @application_form_presenter.becoming_a_teacher_valid? ? candidate_interface_becoming_a_teacher_show_path : candidate_interface_edit_becoming_a_teacher_path,
           )) %>
+
+          <%= render(TaskListItemComponent.new(
+            text: t('page_titles.becoming_a_teacher'),
+            completed: @application_form_presenter.becoming_a_teacher_completed?,
+            path: @application_form_presenter.becoming_a_teacher_valid? ? candidate_interface_becoming_a_teacher_show_path : candidate_interface_edit_becoming_a_teacher_path,
+            custom_color: 'pink',
+            custom_status: 'san'
+          )) %>
         </li>
         <li class="app-task-list__item govuk-hint">
           <%= render(TaskListItemComponent.new(
