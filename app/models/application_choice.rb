@@ -145,6 +145,14 @@ class ApplicationChoice < ApplicationRecord
     [provider, accredited_provider].compact.uniq
   end
 
+  def personal_statement_what_to_improve
+    ReasonsForRejection.new(structured_rejection_reasons).quality_of_application_personal_statement_what_to_improve
+  end
+
+  # def subject_knowledge_what_to_improve
+
+  # end
+
 private
 
   def set_initial_status

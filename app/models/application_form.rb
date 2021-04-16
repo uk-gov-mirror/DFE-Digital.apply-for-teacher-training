@@ -360,6 +360,10 @@ class ApplicationForm < ApplicationRecord
     end
   end
 
+  def becoming_a_teacher_past_feedback
+    CandidateInterface::ProviderFeedback.from_previous_applications(self, :becoming_a_teacher)
+  end
+
 private
 
   def geocode_address_if_required
