@@ -38,11 +38,23 @@ private
   attr_accessor :item
 
   def formatted_start_date
+    if FeatureFlag.active?(:restructured_work_history)
+      if item.is_a?(ApplicationWorkExperience) && item.start_date_unknown
+        return "#{item.start_date.to_s(:month_and_year)} (approximate)"
+      end
+    end
+
     item.start_date.to_s(:month_and_year)
   end
 
   def formatted_end_date
     return 'Present' if item.end_date.nil?
+
+    if FeatureFlag.active?(:restructured_work_history)
+      if item.is_a?(ApplicationWorkExperience) && item.end_date_unknown
+        return "#{item.end_date.to_s(:month_and_year)} (approximate)"
+      end
+    end
 
     item.end_date.to_s(:month_and_year)
   end
