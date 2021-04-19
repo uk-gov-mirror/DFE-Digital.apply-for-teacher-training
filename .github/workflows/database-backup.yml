@@ -1,0 +1,30 @@
+name: Backup Database to Azure Storage
+
+on:
+  workflow_dispatch:
+  schedule: # 01:00 UTC
+    - cron: '0 1 * * *'
+
+jobs:
+  backup:
+    name: Backup PaaS Database (production)
+    runs-on: ubuntu-latest
+    environment:
+      name: production
+    steps:
+    - name: Setup cf cli 
+      uses: DFE-Digital/github-actions/setup-cf-cli@master
+      with:
+        CF_USERNAME:   ${{ secrets.CF_USERNAME }}
+        CF_PASSWORD:   ${{ secrets.CF_PASSWORD }}
+        CF_SPACE_NAME: ${{ secrets.CF_SPACE }}
+        INSTALL_CONDUIT: true
+
+    - name: Setup postgres client
+      uses: DFE-Digital/github-actions/install-postgres-client@master
+        
+    - name: Backup Prod DB
+      run: |
+        date_suffix=$(date +"%F-%H-%M-%S")
+        cf conduit apply-postgres-prod -- pg_dump -E utf8 --clean --if-exists --no-owner --verbose --no-password -f apply_prod_${date_suffix}.sql
+        tar -cvzf apply_prod_${date_suffix}.tar.gz apply_prod_${date_suffix}.sql
