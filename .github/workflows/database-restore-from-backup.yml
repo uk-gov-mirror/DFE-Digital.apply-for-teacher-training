@@ -22,8 +22,14 @@ jobs:
     - name: Setup postgres client
       uses: DFE-Digital/github-actions/install-postgres-client@master
 
-    - name: Download DB backup
+    - name: Download backup and Restore
       run: |
-        az storage blob list \
+        backup_archive=$(az storage blob list \
         --container-name prod-db-backup --prefix apply_prod_ \
-        --connection-string '${{ secrets.AZURE_STORAGE_CONNECTION_STRING }}'
+        --connection-string '${{ secrets.AZURE_STORAGE_CONNECTION_STRING }}' \
+        --query "[?isCurrentVersion==\`true\`].name" -o tsv)
+        
+        az storage blob download --container-name prod-db-backup --connection-string '${{ secrets.AZURE_STORAGE_CONNECTION_STRING }}' \
+        --file $backup_archive --name $backup_archive
+
+        cf conduit apply-postgres-prod --psql < (tar -xzvf $backup_archive)
