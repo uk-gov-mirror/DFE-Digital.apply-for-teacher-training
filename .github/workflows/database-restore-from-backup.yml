@@ -32,4 +32,4 @@ jobs:
         az storage blob download --container-name prod-db-backup --connection-string '${{ secrets.AZURE_STORAGE_CONNECTION_STRING }}' \
         --file $backup_archive --name $backup_archive
 
-        cf conduit apply-postgres-prod --psql < (tar -xzvf $backup_archive)
+        cf conduit apply-postgres-prod --psql -f $(tar -xzvf $backup_archive)
