@@ -18,7 +18,7 @@ class ChangeAnOffer
   def identical_to_existing_offer?
     course_option.present? && \
       course_option == application_choice.offered_option && \
-      application_choice.offer['conditions'] == @offer_conditions
+      application_choice.offer.conditions == @offer_conditions
   end
 
   def save

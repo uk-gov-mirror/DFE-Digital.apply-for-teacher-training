@@ -89,18 +89,18 @@ module ProviderInterface
   private
 
     def self.standard_conditions_from(offer)
-      return MakeAnOffer::STANDARD_CONDITIONS if offer.blank?
+      return MakeAnOffer::STANDARD_CONDITIONS if offer.conditions.blank?
 
-      conditions = offer['conditions']
+      conditions = offer.conditions
       conditions & MakeAnOffer::STANDARD_CONDITIONS
     end
 
     private_class_method :standard_conditions_from
 
     def self.further_conditions_from(offer)
-      return [] if offer.blank?
+      return [] if offer.conditions.blank?
 
-      conditions = offer['conditions']
+      conditions = offer.conditions
       conditions - MakeAnOffer::STANDARD_CONDITIONS
     end
 

@@ -346,7 +346,7 @@ RSpec.describe 'Vendor API - POST /api/v1/applications/:application_id/offer', t
 
       expect {
         post_api_request "/api/v1/applications/#{choice.id}/offer", params: request_body
-      }.to(change { choice.reload.offer })
+      }.to(change { choice.reload.read_attribute(:offer) })
     end
 
     it 'returns 200 OK when sending the same offer & conditions repeatedly' do

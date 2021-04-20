@@ -24,7 +24,7 @@ module SupportInterface
           offered_course_location: choice.offered_site.name,
           offered_course_study_mode: choice.offered_option.study_mode,
           offer_changed: choice.offered_option != choice.course_option,
-          offer_made_at: choice.offered_at.iso8601,
+          offer_made_at: choice.offer.created_at.iso8601,
           choice_status: choice.status,
           conditions: conditions(choice),
         }
@@ -60,7 +60,7 @@ module SupportInterface
     end
 
     def conditions(choice)
-      choice.offer['conditions'].join(', ')
+      choice.offer.conditions.join(', ')
     end
 
     def relevant_choices

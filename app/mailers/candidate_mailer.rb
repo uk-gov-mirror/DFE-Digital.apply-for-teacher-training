@@ -217,7 +217,7 @@ class CandidateMailer < ApplicationMailer
 
   def changed_offer(application_choice)
     @application_choice = application_choice
-    @conditions = @application_choice.offer&.dig('conditions') || []
+    @conditions = @application_choice.offer.conditions || []
 
     @course_option = @application_choice.course_option
     @offered_course_option = @application_choice.offered_course_option
@@ -256,7 +256,7 @@ class CandidateMailer < ApplicationMailer
   def reinstated_offer(application_choice)
     @application_choice = application_choice
     @course_option = @application_choice.offered_option
-    @conditions = @application_choice.offer&.dig('conditions') || []
+    @conditions = @application_choice.offer.conditions || []
 
     email_for_candidate(
       @application_choice.application_form,
@@ -312,7 +312,7 @@ class CandidateMailer < ApplicationMailer
   def offer_withdrawn(application_choice)
     @course_name_and_code = application_choice.offered_option.course.name_and_code
     @provider_name = application_choice.offered_option.provider.name
-    @withdrawal_reason = application_choice.offer_withdrawal_reason
+    @withdrawal_reason = application_choice.offer.withdrawal_reason
     @candidate_magic_link = candidate_magic_link(application_choice.application_form.candidate)
 
     email_for_candidate(
@@ -429,7 +429,7 @@ private
     course_option = CourseOption.find_by(id: @application_choice.offered_course_option_id) || @application_choice.course_option
     @provider_name = course_option.course.provider.name
     @course_name = course_option.course.name_and_code
-    @conditions = @application_choice.offer&.dig('conditions') || []
+    @conditions = @application_choice.offer.conditions || []
     @offers = @application_choice.self_and_siblings.select(&:offer?).map do |offer|
       "#{offer.course_option.course.name_and_code} at #{offer.course_option.course.provider.name}"
     end

@@ -88,11 +88,11 @@ module SupportInterface
     end
 
     def provider_decision
-      @application_choice.offered_at || @application_choice.rejected_at
+      @application_choice.offer.created_at || @application_choice.rejected_at
     end
 
     def offer_made
-      @application_choice.offered_at
+      @application_choice.offer.created_at
     end
 
     def dbd_date
@@ -104,19 +104,19 @@ module SupportInterface
     end
 
     def candidate_decision
-      @application_choice.accepted_at || @application_choice.declined_at
+      @application_choice.offer.accepted_at || @application_choice.offer.declined_at
     end
 
     def offer_declined
-      @application_choice.declined_at
+      @application_choice.offer.declined_at
     end
 
     def offer_accepted
-      @application_choice.accepted_at
+      @application_choice.offer.accepted_at
     end
 
     def conditions_outcome
-      @application_choice.recruited_at || @application_choice.conditions_not_met_at
+      @application_choice.recruited_at || @application_choice.offer.conditions_not_met_at
     end
 
     def conditions_met
@@ -124,7 +124,7 @@ module SupportInterface
     end
 
     def conditions_not_met
-      @application_choice.conditions_not_met_at
+      @application_choice.offer.conditions_not_met_at
     end
 
     def ended_without_success

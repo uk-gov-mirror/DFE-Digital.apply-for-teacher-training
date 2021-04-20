@@ -123,7 +123,7 @@ module ProviderInterface
     end
 
     def state
-      as_json(except: %w[state_store errors validation_context]).to_json
+      as_json(except: %w[state_store errors validation_context application_choice]).to_json
     end
   end
 end

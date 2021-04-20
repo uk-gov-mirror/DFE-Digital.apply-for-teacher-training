@@ -87,7 +87,7 @@ module ProviderInterface
     end
 
     def new_offer?
-      application_choice.offer.blank?
+      application_choice.offer.conditions.blank?
     end
 
     def selected_course_option

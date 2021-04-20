@@ -68,7 +68,7 @@ module DataAPI
     def status
       if application_choice.rejected_by_default?
         'rejected_by_default'
-      elsif application_choice.declined_by_default?
+      elsif application_choice.offer.declined_by_default?
         'declined_by_default'
       else
         application_choice.status

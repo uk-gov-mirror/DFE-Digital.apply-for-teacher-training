@@ -102,7 +102,7 @@ private
   def group_by_status(applications)
     applications.inject(APPLICATION_OUTCOME_EVENTS.index_with { |_| [] }) do |grouped, application|
       status = :rejected_by_default if application.rejected? && application.rejected_by_default?
-      status = :declined_by_default if application.declined? && application.declined_by_default?
+      status = :declined_by_default if application.declined? && application.offer.declined_by_default?
 
       grouped[status || application.status.to_sym] << application
       grouped

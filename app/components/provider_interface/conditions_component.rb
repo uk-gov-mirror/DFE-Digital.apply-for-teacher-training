@@ -9,11 +9,11 @@ module ProviderInterface
     end
 
     def render?
-      application_choice.offer.present?
+      application_choice.offer.conditions.present?
     end
 
     def conditions
-      application_choice.offer['conditions']
+      application_choice.offer.conditions
     end
 
     def condition_rows

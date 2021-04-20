@@ -109,13 +109,13 @@ module CandidateInterface
 
     def conditions_row(application_choice)
       return unless (application_choice.pending_conditions? || application_choice.offer?) &&
-        (application_choice.offer.present? && !application_choice.offer['conditions'].count.zero?)
+        (application_choice.offer.conditions.present? && !application_choice.offer.conditions.count.zero?)
 
       {
-        key: 'Condition'.pluralize(application_choice.offer['conditions'].count),
+        key: 'Condition'.pluralize(application_choice.offer.conditions.count),
         value: render(
           OfferConditionsReviewComponent.new(
-            conditions: application_choice.offer['conditions'],
+            conditions: application_choice.offer.conditions,
             provider: application_choice.offered_course.provider.name,
           ),
         ),
@@ -160,10 +160,10 @@ module CandidateInterface
     end
 
     def offer_withdrawal_reason_row(application_choice)
-      if application_choice.offer_withdrawal_reason.present?
+      if application_choice.offer.withdrawal_reason.present?
         {
           key: 'Reason for offer withdrawal',
-          value: application_choice.offer_withdrawal_reason,
+          value: application_choice.offer.withdrawal_reason,
         }
       end
     end

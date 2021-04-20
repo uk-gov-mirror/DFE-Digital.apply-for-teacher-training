@@ -90,10 +90,10 @@ module VendorAPI
           reason: RejectionReasonPresenter.new(application_choice).present,
           date: application_choice.rejected_at.iso8601,
         }
-      elsif application_choice.offer_withdrawal_reason?
+      elsif application_choice.offer.withdrawal_reason.present?
         {
-          reason: application_choice.offer_withdrawal_reason,
-          date: application_choice.offer_withdrawn_at.iso8601,
+          reason: application_choice.offer.withdrawal_reason,
+          date: application_choice.offer.withdrawn_at.iso8601,
         }
       elsif application_choice.rejected_by_default?
         {
@@ -354,14 +354,16 @@ module VendorAPI
     end
 
     def offer
-      return nil if application_choice.offer.nil?
+      return nil if application_choice.offer.conditions.nil?
 
-      application_choice.offer
+      {
+        conditions: application_choice.offer.conditions,
+      }
         .merge(offered_course)
         .merge({
-          offer_made_at: application_choice.offered_at,
-          offer_accepted_at: application_choice.accepted_at,
-          offer_declined_at: application_choice.declined_at,
+          offer_made_at: application_choice.offer.created_at,
+          offer_accepted_at: application_choice.offer.accepted_at,
+          offer_declined_at: application_choice.offer.declined_at,
         })
     end
 

@@ -180,10 +180,10 @@ module CandidateInterface
     end
 
     def offer_withdrawal_reason_row(application_choice)
-      if application_choice.offer_withdrawal_reason.present?
+      if application_choice.offer.withdrawal_reason.present?
         {
           key: 'Reason for offer withdrawal',
-          value: application_choice.offer_withdrawal_reason,
+          value: application_choice.offer.withdrawal_reason,
         }
       end
     end

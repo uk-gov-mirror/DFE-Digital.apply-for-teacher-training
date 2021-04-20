@@ -45,28 +45,32 @@ class ApplicationChoice < ApplicationRecord
     ApplicationStateChange::DECISION_PENDING_STATUSES.include? status.to_sym
   end
 
+  def offer
+    Offer.new(application_choice: self)
+  end
+
   def different_offer?
     offered_course_option_id && offered_course_option_id != course_option_id
   end
 
   def offered_option
-    offered_course_option || course_option
+    offer.course_option
   end
 
   def offered_provider
-    offered_option.provider
+    offer.provider
   end
 
   def offered_course
-    offered_option.course
+    offer.course
   end
 
   def offered_site
-    offered_option.site
+    offer.site
   end
 
   def recruitment_cycle
-    offered_course.recruitment_cycle_year
+    offer.recruitment_cycle
   end
 
   def days_left_to_respond

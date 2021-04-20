@@ -19,9 +19,9 @@ module SupportInterface
             reject_by_default_at: choice.reject_by_default_at,
             decline_by_default_at: choice.decline_by_default_at,
             decision: decision_interpretation(choice: choice),
-            decided_at: choice.offered_at || choice.rejected_at,
+            decided_at: choice.offer.created_at || choice.rejected_at,
             offer_response: offer_response_interpretation(choice: choice),
-            offer_response_at: choice.accepted_at || choice.declined_at,
+            offer_response_at: choice.offer.accepted_at || choice.offer.declined_at,
             recruited_at: choice.recruited_at,
             rejection_reason: choice.rejection_reason,
             structured_rejection_reasons: FlatReasonsForRejectionPresenter.build_top_level_reasons(choice.structured_rejection_reasons),
@@ -37,7 +37,7 @@ module SupportInterface
   private
 
     def decision_interpretation(choice:)
-      if choice.offered_at.present?
+      if choice.offer.created_at.present?
         :offered
       elsif choice.rejected_by_default? && choice.rejected_at.present?
         :rejected_by_default
@@ -49,11 +49,11 @@ module SupportInterface
     end
 
     def offer_response_interpretation(choice:)
-      if choice.accepted_at.present?
+      if choice.offer.accepted_at.present?
         :accepted
-      elsif choice.declined_by_default? && choice.declined_at.present?
+      elsif choice.offer.declined_by_default? && choice.offer.declined_at.present?
         :declined_by_default
-      elsif choice.declined_at.present?
+      elsif choice.offer.declined_at.present?
         :declined
       elsif choice.offer?
         :awaiting_candidate

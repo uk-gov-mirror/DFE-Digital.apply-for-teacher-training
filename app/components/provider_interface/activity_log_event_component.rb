@@ -33,7 +33,7 @@ module ProviderInterface
       when 'offer_withdrawn'
         "#{user} withdrew #{candidate}’s offer"
       when 'declined'
-        if application_choice.declined_by_default
+        if application_choice.offer.declined_by_default
           "#{candidate}’s offer was automatically declined"
         else
           "#{candidate} declined an offer"
