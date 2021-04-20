@@ -1,0 +1,29 @@
+name: Restore Database from Azure Storage Backup
+
+on:
+  push:
+  workflow_dispatch:
+
+jobs:
+  restore:
+    name: Restore Production Database from Azure Backup
+    runs-on: ubuntu-latest
+    environment:
+      name: production
+    steps:
+    - name: Setup cf cli
+      uses: DFE-Digital/github-actions/setup-cf-cli@master
+      with:
+        CF_USERNAME:   ${{ secrets.CF_USERNAME }}
+        CF_PASSWORD:   ${{ secrets.CF_PASSWORD }}
+        CF_SPACE_NAME: ${{ secrets.CF_SPACE }}
+        INSTALL_CONDUIT: true
+
+    - name: Setup postgres client
+      uses: DFE-Digital/github-actions/install-postgres-client@master
+
+    - name: Download DB backup
+      run: |
+        az storage blob list \
+        --container-name prod-db-backup --prefix apply_prod_ \
+        --connection-string '${{ secrets.AZURE_STORAGE_CONNECTION_STRING }}'
