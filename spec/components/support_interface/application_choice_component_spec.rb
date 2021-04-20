@@ -1,6 +1,36 @@
 require 'rails_helper'
 
 RSpec.describe SupportInterface::ApplicationChoiceComponent do
+  context 'Declined offer' do
+    let(:declined_offer) { create(:application_choice, :with_completed_application_form, :with_declined_offer) }
+
+    it 'Renders a link to the reinstate offer page when the reinstate flag is active' do
+      FeatureFlag.activate(:support_user_reinstate_offer)
+
+      render_inline(described_class.new(declined_offer))
+      expect(page).to have_link(
+        'Reinstate offer',
+        href: Rails.application.routes.url_helpers.support_interface_application_form_reinstate_offer_path(
+          application_form_id: declined_offer.application_form.id,
+          application_choice_id: declined_offer.id,
+        ),
+      )
+    end
+
+    it 'Does not render a link to the reinstate offer page when the reinstate flag is n active' do
+      FeatureFlag.deactivate(:support_user_reinstate_offer)
+
+      render_inline(described_class.new(declined_offer))
+      expect(page).not_to have_link(
+        'Reinstate offer',
+        href: Rails.application.routes.url_helpers.support_interface_application_form_reinstate_offer_path(
+          declined_offer.application_form.id,
+          declined_offer.id,
+        ),
+      )
+    end
+  end
+
   it 'displays the date an application was rejected' do
     application_choice = create(:application_choice,
                                 :with_completed_application_form,
