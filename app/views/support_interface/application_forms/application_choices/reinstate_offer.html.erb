@@ -1,0 +1,39 @@
+<% content_for :browser_title, 'Reinstate offer' %>
+<% content_for :before_content, govuk_back_link_to(support_interface_application_form_path(application_form_id: params[:application_form_id]), 'Back to application') %>
+
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-two-thirds">
+    <h1 class="govuk-heading-l">
+      Are you sure you want to reinstate the offer for this course choice?
+    </h1>
+
+    <p class="govuk-body">
+      This will be some guidance
+    </p>
+  </div>
+</div>
+
+
+<%= form_with model: @declined_course_choice, url: support_interface_application_form_reinstate_offer_path(application_form_id: params[:application_form_id], application_choice_id: params[:application_choice_id]) do |f| %>
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds">
+      <%= f.govuk_text_area(
+              :audit_comment_ticket,
+              label: {
+                text: 'Add the link to the Zendesk ticket',
+                tag: 'p',
+                size: 's',
+              },
+              rows: 1,
+              hint: { text: 'Does this need hint text?' },
+            ) %>
+    </div>
+  </div>
+
+  <div class="govuk-form-group">
+    <%= f.hidden_field :accept_guidance, value: false %>
+    <%= f.govuk_check_box :accept_guidance, true, label: { text: 'I have agreed to blahblah' }  %>
+  </div>
+
+  <%= f.govuk_submit t('continue') %>
+<% end %>

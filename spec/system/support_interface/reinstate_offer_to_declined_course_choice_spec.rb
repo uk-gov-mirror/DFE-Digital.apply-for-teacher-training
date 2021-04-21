@@ -79,7 +79,7 @@ RSpec.feature 'Reinstate offer to a declined course choice' do
   end
 
   def and_i_click_continue
-    click_button 'continue'
+    click_button 'Continue'
   end
 
   def then_i_am_told_to_confirm_i_have_followed_the_guidance
