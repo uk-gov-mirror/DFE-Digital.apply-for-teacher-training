@@ -45,7 +45,7 @@
           to see if the course will re-open or discuss alternatives
         </li>
       </ul>
-    <% elsif application_choice.site_full? %>
+    <% elsif application_choice.site_full? || application_choice.site_invalid? %>
       <p class="app-inset-text__title"><%= application_choice.site_full_error %>.</p>
       <p class="govuk-body">You can:</p>
       <ul class="govuk-list govuk-list--bullet">
