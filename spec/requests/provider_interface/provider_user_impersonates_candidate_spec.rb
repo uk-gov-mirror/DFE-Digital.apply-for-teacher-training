@@ -15,6 +15,7 @@ RSpec.describe 'POST /provider/candidates/:id/impersonate' do
     end
 
     before do
+      provider_user.provider_permissions.find_by(provider: provider).update!(make_decisions: true)
       allow(DfESignInUser).to receive(:load_from_session)
         .and_return(
           DfESignInUser.new(

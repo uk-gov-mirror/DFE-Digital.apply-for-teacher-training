@@ -5,7 +5,7 @@ module ProviderInterface
     def impersonate
       candidate = Candidate.find(params[:candidate_id])
 
-      if verify_provider_association(candidate: candidate, providers: current_provider_user.providers)
+      if verify_provider_association(candidate)
         bypass_sign_in(candidate, scope: :candidate)
 
         flash[:success] = "You are now signed in as candidate #{candidate.email_address}"
@@ -20,12 +20,11 @@ module ProviderInterface
 
   private
 
-    def verify_provider_association(candidate:, providers:)
-      provider_ids_from_candidate = candidate.application_forms
-                                              .map(&:application_choices).flatten
-                                              .map(&:provider).map(&:id).uniq
+    def verify_provider_association(candidate)
+      auth = ProviderAuthorisation.new(actor: current_provider_user)
+      application_choices = candidate.application_forms.map(&:application_choices).flatten
 
-      providers.any? { |provider| provider_ids_from_candidate.include? provider.id }
+      application_choices.any? { |ac| auth.can_make_decisions?(application_choice: ac, course_option_id: ac.course_option_id) }
     end
 
     def disable_on_production
