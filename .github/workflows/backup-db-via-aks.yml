@@ -63,7 +63,7 @@ jobs:
         title: Postgres Backup Job (AKS)
         service:  ${{ vars.TEAMS_MSG_SERVICE_NAME }}
         message: |
-          The Postgres backup of ${{ env.DEPLOY_ENV }} via AKS pod was successful
+          The Postgres backup of ${{ env.DEPLOY_ENV }} via AKS pod has failed
 
     - name: Notify teams channel on workflow success
       uses: DFE-Digital/github-actions/send-to-teams-channel@master
@@ -74,4 +74,5 @@ jobs:
         status: good
         minimal: true
         message: |
-          The Postgres backup of ${{ env.DEPLOY_ENV }} via AKS pod has failed
+          The Postgres backup of ${{ env.DEPLOY_ENV }} via AKS pod was successful
+          
