@@ -419,6 +419,8 @@ aks_db_job_cleanup:
 
 ##############################################################################
 # Common configuration
+# Notes
+# date function differs mac to linux, so using python3 to get UTC time in ISO format
 ##############################################################################
 
 aks_db_job_set_common_vars: get-cluster-credentials
@@ -427,8 +429,9 @@ aks_db_job_set_common_vars: get-cluster-credentials
 	$(eval STORAGE_ACCOUNT_NAME=${RESOURCE_NAME_PREFIX}${SERVICE_SHORT}dbbkp${CONFIG_SHORT}sa)
 	$(eval CONTAINER_NAME=database-backup)
 	$(eval SAS_VALID_HOURS=2)
-	$(eval TODAY=$(shell date +"%F_%H%M%S"))
-	$(eval EXPIRY=$(shell date -u -d "+$(SAS_VALID_HOURS) hours" +%Y-%m-%dT%H:%MZ))
+	$(eval TODAY=$(shell date +"%F_%H%M%S"))	
+	$(eval EXPIRY=$(shell python3 -c 'from datetime import datetime,timedelta,timezone; print((datetime.now(timezone.utc)+timedelta(hours=$(SAS_VALID_HOURS))).strftime("%Y-%m-%dT%H:%MZ"))'))
+	
 
 	$(eval SECRET_REF_NAME=$(shell \
 		kubectl get deployment $(DEPLOYMENT_NAME) \
