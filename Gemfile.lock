@@ -930,7 +930,7 @@ DEPENDENCIES
   geocoder
   get_into_teaching_api_client_faraday (= 4.3.8)!
   google-cloud-bigquery
-  govuk-components (~> 6.4)
+  govuk-components (~> 6.5)
   govuk_design_system_formbuilder (~> 6.4.0)
   govuk_markdown
   grover
