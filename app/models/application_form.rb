@@ -811,9 +811,9 @@ class ApplicationForm < ApplicationRecord
     COUNTRIES_AND_TERRITORIES[country] || 'your current country of residence'
   end
 
-  def has_selected_course_level?(level)
+  def has_selected_secondary_course?
     application_choices.any? do |ac|
-      ac.course.level == level
+      ac.course.secondary_course?
     end
   end
 

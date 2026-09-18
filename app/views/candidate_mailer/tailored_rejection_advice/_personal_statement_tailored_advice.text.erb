@@ -3,7 +3,7 @@
 ## Improve your personal statement
 <% end %>
 
-<% unless @application_choice.course.primary_course? %>
+<% if @application_choice.course.secondary_course? %>
   A teacher training adviser can provide free support to help you improve your personal statement.
 
   [Learn more about teacher training advisers](<%= t('get_into_teaching.url_get_an_adviser_start') %>).

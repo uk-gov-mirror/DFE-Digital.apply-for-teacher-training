@@ -4,6 +4,6 @@ Learn more about [what to include in your application](<%= email_link_with_utm_p
 
 <% if @application_form.adviser_status_assigned? %>
   You can also contact your teacher training adviser for support with writing your application.
-<% elsif @application_form.has_selected_course_level?('secondary') %>
+<% elsif @application_form.has_selected_secondary_course? %>
   You can also [get a teacher training adviser](<%= email_link_with_utm_params I18n.t('get_into_teaching.url_get_an_adviser_start'), 'eoc_deadline_reminder', @application_form.phase %>) for free, one-to-one support to help you write a strong application.
 <% end %>

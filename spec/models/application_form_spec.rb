@@ -2320,17 +2320,15 @@ RSpec.describe ApplicationForm do
     end
   end
 
-  describe '#has_selected_course_level?' do
+  describe '#has_selected_secondary_course?' do
     it 'returns true if any application choice matches the given level' do
       secondary_course = create(:course, :with_course_options, :secondary)
       secondary_choice = create(:application_choice, course_option: secondary_course.course_options.first)
-      expect(secondary_choice.application_form.has_selected_course_level?('secondary')).to be(true)
-      expect(secondary_choice.application_form.has_selected_course_level?('primary')).to be(false)
+      expect(secondary_choice.application_form.has_selected_secondary_course?).to be(true)
 
       primary_course = create(:course, :with_course_options, :primary)
       primary_choice = create(:application_choice, course_option: primary_course.course_options.first)
-      expect(primary_choice.application_form.has_selected_course_level?('secondary')).to be(false)
-      expect(primary_choice.application_form.has_selected_course_level?('primary')).to be(true)
+      expect(primary_choice.application_form.has_selected_secondary_course?).to be(false)
     end
   end
 end

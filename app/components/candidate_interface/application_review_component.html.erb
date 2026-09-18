@@ -13,7 +13,7 @@
     <ul class="govuk-list govuk-list--bullet">
       <li>contact the provider directly if you have any questions</li>
       <li>find out more about <%= govuk_link_to('funding your training', t('get_into_teaching.url_funding_and_support'), target: '_blank') %></li>
-      <% unless primary_course? %>
+      <% if secondary_course? %>
         <li>get help from a <%= govuk_link_to('teacher training adviser', t('get_into_teaching.url_get_an_adviser_signup'), target: '_blank') %></li>
       <% end %>
     </ul>
@@ -34,7 +34,7 @@
       <% end %>
       <li>contact the provider directly if you have any questions</li>
       <li>find out more about <%= govuk_link_to 'funding your training', t('get_into_teaching.url_funding_and_support'), target: '_blank' %></li>
-      <% unless primary_course? %>
+      <% if secondary_course? %>
         <li>get help from a <%= govuk_link_to 'teacher training adviser', t('get_into_teaching.url_get_an_adviser_signup'), target: '_blank' %></li>
       <% end %>
     </ul>
