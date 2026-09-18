@@ -811,6 +811,12 @@ class ApplicationForm < ApplicationRecord
     COUNTRIES_AND_TERRITORIES[country] || 'your current country of residence'
   end
 
+  def has_selected_course_level?(level)
+    application_choices.any? do |ac|
+      ac.course.level == level
+    end
+  end
+
 private
 
   def geocode_address_and_update_region_if_required
