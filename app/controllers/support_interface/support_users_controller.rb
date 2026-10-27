@@ -13,6 +13,10 @@ module SupportInterface
       @support_user = SupportUser.new
     end
 
+    def edit
+      @support_user = SupportUser.find(params.expect(:id))
+    end
+
     def create
       @support_user = SupportUser.new(support_user_params)
 
@@ -22,10 +26,6 @@ module SupportInterface
       else
         render :new
       end
-    end
-
-    def edit
-      @support_user = SupportUser.find(params.expect(:id))
     end
 
     def update
