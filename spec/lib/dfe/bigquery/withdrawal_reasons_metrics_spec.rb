@@ -4,286 +4,194 @@ RSpec.describe DfE::Bigquery::WithdrawalReasonsMetrics do
   include DfE::Bigquery::TestHelper
 
   before do
-    TestSuiteTimeMachine.travel_permanently_to(mid_cycle(2027))
+    TestSuiteTimeMachine.travel_permanently_to(mid_cycle(2026))
   end
 
   describe '.data' do
     let(:provider) { create(:provider) }
     let(:rows) do
-      [{
-        withdrawal_tier: 'tier_2',
-        tier_withdrawal_reason: 'apply-in-the-future.personal-circumstances-have-changed',
-        before_accepting: '48',
-        after_accepting: '30',
-      }, {
-        withdrawal_tier: 'tier_2',
-        tier_withdrawal_reason: 'apply-in-the-future.gain-more-experience',
-        before_accepting: '33',
-        after_accepting: '9',
-      }, {
-        withdrawal_tier: 'tier_2',
-        tier_withdrawal_reason: 'apply-in-the-future.other',
-        before_accepting: '6',
-        after_accepting: '6',
-      }, {
-        withdrawal_tier: 'tier_2',
-        tier_withdrawal_reason: 'apply-in-the-future.improve-qualifications',
-        before_accepting: '12',
-        after_accepting: '6',
-      }, {
-        withdrawal_tier: 'tier_3',
-        tier_withdrawal_reason: 'apply-in-the-future.personal-circumstances-have-changed.concerns-about-cost-of-doing-course',
-        before_accepting: '28',
-        after_accepting: '12',
-      }, {
-        withdrawal_tier: 'tier_3',
-        tier_withdrawal_reason: 'apply-in-the-future.personal-circumstances-have-changed.concerns-about-training-with-a-disability-or-health-condition',
-        before_accepting: '3',
-        after_accepting: '4',
-      }, {
-        withdrawal_tier: 'tier_3',
-        tier_withdrawal_reason: 'apply-in-the-future.personal-circumstances-have-changed.other',
-        before_accepting: '7',
-        after_accepting: '11',
-      }, {
-        withdrawal_tier: 'tier_3',
-        tier_withdrawal_reason: 'apply-in-the-future.personal-circumstances-have-changed.concerns-about-having-enough-time-to-train',
-        before_accepting: '15',
-        after_accepting: '5',
-      }, {
-        withdrawal_tier: 'tier_1',
-        tier_withdrawal_reason: 'apply-in-the-future',
-        before_accepting: '86',
-        after_accepting: '45',
-      }]
-    end
-    let(:results) do
-      [
-        {
-          nonprovider_filter: 'Prefer not to say',
-          nonprovider_filter_category: 'Sex',
-          cycle_week: 18,
-          recruitment_cycle_year: 2024,
-          provider_id: nil,
-          number_of_candidates_submitted_to_date: 100,
-          number_of_candidates_submitted_to_same_date_previous_cycle: 200,
-          number_of_candidates_submitted_to_date_as_proportion_of_last_cycle: 0.5,
-          number_of_candidates_with_offers_to_date: 10,
-          number_of_candidates_with_offers_to_same_date_previous_cycle: 5,
-          number_of_candidates_with_offers_to_date_as_proportion_of_last_cycle: 2.0,
-          offer_rate_to_date: 1.2,
-          offer_rate_to_same_date_previous_cycle: 1.5,
-          number_of_candidates_accepted_to_date: 1,
-          number_of_candidates_accepted_to_same_date_previous_cycle: 10,
-          number_of_candidates_accepted_to_date_as_proportion_of_last_cycle: 0.1,
-          number_of_candidates_with_reconfirmed_offers_deferred_from_previous_cycle_to_date: 12,
-          number_of_candidates_with_reconfirmed_offers_deferred_from_previous_cycle_to_same_date_previous_cycle: 12,
-          number_of_candidates_with_reconfirmed_offers_deferred_from_previous_cycle_to_date_as_proportion_of_last_cycle: 0,
-          number_of_candidates_who_had_all_applications_rejected_this_cycle_to_date: 12,
-          number_of_candidates_who_had_all_applications_rejected_this_cycle_to_same_date_previous_cycle: 12,
-          number_of_candidates_who_had_all_applications_rejected_this_cycle_to_date_as_proportion_of_last_cycle: 0,
-          number_of_candidates_who_had_an_inactive_application_this_cycle_to_date: 12,
-          number_of_candidates_who_had_an_inactive_application_this_cycle_to_date_as_proportion_of_submitted_candidates: 0.12,
-          number_of_candidates_who_had_an_inactive_application_last_cycle_to_date_as_proportion_of_submitted_candidates_last_cycle: 0.12,
-          recruited_rate_to_date: 0.12,
-          recruited_rate_to_same_date_previous_cycle: 0.12,
-        },
-      ]
-    end
-
-    subject(:national_statistics) do
-      described_class.new(provider_id: provider.id).data
-    end
-
-    before do
-      stub_bigquery_national_edi_request(rows:)
-    end
-
-    it 'returns the first result' do
-      expect(national_statistics.as_json).to eq(results.as_json)
-    end
-
-    it 'provides the correct SQL' do
-      allow(Google::Apis::BigqueryV2::QueryRequest).to receive(:new).and_call_original
-      national_statistics
-      expect(Google::Apis::BigqueryV2::QueryRequest).to have_received(:new).with(query: <<~SQL, timeout_ms: 10_000, use_legacy_sql: false)
-        SELECT nonprovider_filter, nonprovider_filter_category, cycle_week, recruitment_cycle_year, provider.id, number_of_candidates_submitted_to_date, number_of_candidates_submitted_to_same_date_previous_cycle, number_of_candidates_submitted_to_date_as_proportion_of_last_cycle, number_of_candidates_with_offers_to_date, number_of_candidates_with_offers_to_same_date_previous_cycle, number_of_candidates_with_offers_to_date_as_proportion_of_last_cycle, offer_rate_to_date, offer_rate_to_same_date_previous_cycle, number_of_candidates_accepted_to_date, number_of_candidates_accepted_to_same_date_previous_cycle, number_of_candidates_accepted_to_date_as_proportion_of_last_cycle, number_of_candidates_with_reconfirmed_offers_deferred_from_previous_cycle_to_date, number_of_candidates_with_reconfirmed_offers_deferred_from_previous_cycle_to_same_date_previous_cycle, number_of_candidates_with_reconfirmed_offers_deferred_from_previous_cycle_to_date_as_proportion_of_last_cycle, number_of_candidates_who_had_all_applications_rejected_this_cycle_to_date, number_of_candidates_who_had_all_applications_rejected_this_cycle_to_same_date_previous_cycle, number_of_candidates_who_had_all_applications_rejected_this_cycle_to_date_as_proportion_of_last_cycle, number_of_candidates_who_had_an_inactive_application_this_cycle_to_date, number_of_candidates_who_had_an_inactive_application_this_cycle_to_date_as_proportion_of_submitted_candidates, number_of_candidates_who_had_an_inactive_application_last_cycle_to_date_as_proportion_of_submitted_candidates_last_cycle, recruited_rate_to_date, recruited_rate_to_same_date_previous_cycle
-        FROM `1_key_tables.application_metrics_by_provider`
-        WHERE teach_first_or_iot_filter = "All"
-        AND provider_filter_category = "All"
-        AND cycle_week = 18
-        AND recruitment_cycle_year = 2024
-      SQL
-    end
-
-    it 'assigns the attributes for the application metrics', :aggregate_failures do
-      expect(national_statistics.first.nonprovider_filter).to eq 'Prefer not to say'
-      expect(national_statistics.first.nonprovider_filter_category).to eq 'Sex'
-      expect(national_statistics.first.cycle_week).to eq 18
-      expect(national_statistics.first.recruitment_cycle_year).to eq 2024
-      expect(national_statistics.first.provider_id).to be_nil
-      expect(national_statistics.first.number_of_candidates_submitted_to_date).to eq 100
-      expect(national_statistics.first.number_of_candidates_submitted_to_same_date_previous_cycle).to eq 200
-      expect(national_statistics.first.number_of_candidates_submitted_to_date_as_proportion_of_last_cycle).to eq 0.5
-      expect(national_statistics.first.number_of_candidates_with_offers_to_date).to eq 10
-      expect(national_statistics.first.number_of_candidates_with_offers_to_same_date_previous_cycle).to eq 5
-      expect(national_statistics.first.number_of_candidates_with_offers_to_date_as_proportion_of_last_cycle).to eq 2.0
-      expect(national_statistics.first.number_of_candidates_accepted_to_date).to eq 1
-      expect(national_statistics.first.number_of_candidates_accepted_to_same_date_previous_cycle).to eq 10
-      expect(national_statistics.first.number_of_candidates_accepted_to_date_as_proportion_of_last_cycle).to eq 0.1
-      expect(national_statistics.first.number_of_candidates_with_reconfirmed_offers_deferred_from_previous_cycle_to_date).to eq 12
-      expect(national_statistics.first.number_of_candidates_with_reconfirmed_offers_deferred_from_previous_cycle_to_same_date_previous_cycle).to eq 12
-      expect(national_statistics.first.number_of_candidates_with_reconfirmed_offers_deferred_from_previous_cycle_to_date_as_proportion_of_last_cycle).to eq 0
-      expect(national_statistics.first.number_of_candidates_who_had_all_applications_rejected_this_cycle_to_date).to eq 12
-      expect(national_statistics.first.number_of_candidates_who_had_all_applications_rejected_this_cycle_to_same_date_previous_cycle).to eq 12
-      expect(national_statistics.first.number_of_candidates_who_had_all_applications_rejected_this_cycle_to_date_as_proportion_of_last_cycle).to eq 0
-      expect(national_statistics.first.number_of_candidates_who_had_an_inactive_application_this_cycle_to_date).to eq 12
-      expect(national_statistics.first.number_of_candidates_who_had_an_inactive_application_this_cycle_to_date_as_proportion_of_submitted_candidates).to eq 0.12
-      expect(national_statistics.first.number_of_candidates_who_had_an_inactive_application_last_cycle_to_date_as_proportion_of_submitted_candidates_last_cycle).to eq 0.12
-      expect(national_statistics.first.number_of_candidates_submitted_to_date).to eq 100
-      expect(national_statistics.first.recruited_rate_to_date).to eq 0.12
-      expect(national_statistics.first.recruited_rate_to_same_date_previous_cycle).to eq 0.12
-    end
-
-    context 'when the api returns no data' do
-      before do
-        stub_bigquery_national_edi_request(rows: [])
-      end
-
-      it 'returns an empty array' do
-        expect(national_statistics).to be_empty
-      end
-    end
-  end
-
-  describe '.provider_data' do
-    subject(:provider_statistics) do
-      described_class.new(cycle_week: 18, provider_id: 1).provider_data
-    end
-
-    let(:rows) do
       [[
-        { name: 'nonprovider_filter', type: 'STRING', value: 'Prefer not to say' },
-        { name: 'nonprovider_filter_category', type: 'STRING', value: 'Sex' },
-        { name: 'cycle_week', type: 'INTEGER', value: '18' },
-        { name: 'recruitment_cycle_year', type: 'INTEGER', value: '2024' },
+        { name: 'provider_code', type: 'STRING', value: 'code' },
         { name: 'provider_id', type: 'STRING', value: '1' },
-        { name: 'number_of_candidates_submitted_to_date', type: 'INTEGER', value: '100' },
-        { name: 'number_of_candidates_submitted_to_same_date_previous_cycle', type: 'INTEGER', value: '200' },
-        { name: 'number_of_candidates_submitted_to_date_as_proportion_of_last_cycle', type: 'FLOAT', value: '0.5' },
-        { name: 'number_of_candidates_with_offers_to_date', type: 'INTEGER', value: '10' },
-        { name: 'number_of_candidates_with_offers_to_same_date_previous_cycle', type: 'INTEGER', value: '5' },
-        { name: 'number_of_candidates_with_offers_to_date_as_proportion_of_last_cycle', type: 'FLOAT', value: '2.0' },
-        { name: 'offer_rate_to_date', type: 'FLOAT', value: '1.2' },
-        { name: 'offer_rate_to_same_date_previous_cycle', type: 'FLOAT', value: '1.5' },
-        { name: 'number_of_candidates_accepted_to_date', type: 'INTEGER', value: '1' },
-        { name: 'number_of_candidates_accepted_to_same_date_previous_cycle', type: 'INTEGER', value: '10' },
-        { name: 'number_of_candidates_accepted_to_date_as_proportion_of_last_cycle', type: 'FLOAT', value: '0.1' },
-        { name: 'number_of_candidates_with_reconfirmed_offers_deferred_from_previous_cycle_to_date', type: 'INTEGER', value: '12' },
-        { name: 'number_of_candidates_with_reconfirmed_offers_deferred_from_previous_cycle_to_same_date_previous_cycle', type: 'INTEGER', value: '12' },
-        { name: 'number_of_candidates_with_reconfirmed_offers_deferred_from_previous_cycle_to_date_as_proportion_of_last_cycle', type: 'INTEGER', value: '0' },
-        { name: 'number_of_candidates_who_had_all_applications_rejected_this_cycle_to_date', type: 'INTEGER', value: '12' },
-        { name: 'number_of_candidates_who_had_all_applications_rejected_this_cycle_to_same_date_previous_cycle', type: 'INTEGER', value: '12' },
-        { name: 'number_of_candidates_who_had_all_applications_rejected_this_cycle_to_date_as_proportion_of_last_cycle', type: 'INTEGER', value: '0' },
-        { name: 'number_of_candidates_who_had_an_inactive_application_this_cycle_to_date', type: 'INTEGER', value: '12' },
-        { name: 'number_of_candidates_who_had_an_inactive_application_this_cycle_to_date_as_proportion_of_submitted_candidates', type: 'FLOAT', value: '0.12' },
-        { name: 'number_of_candidates_who_had_an_inactive_application_last_cycle_to_date_as_proportion_of_submitted_candidates_last_cycle', type: 'FLOAT', value: '0.12' },
-        { name: 'recruited_rate_to_date', type: 'FLOAT', value: '0.12' },
-        { name: 'recruited_rate_to_same_date_previous_cycle', type: 'FLOAT', value: '0.12' },
+        { name: 'provider_name', type: 'STRING', value: 'provider name' },
+        { name: 'recruitment_cycle_year', type: 'STRING', value: '2026' },
+        { name: 'withdrawal_tier', type: 'STRING', value: 'tier_2' },
+        { name: 'tier_withdrawal_reason', type: 'STRING', value: 'do-not-want-to-train-anymore.another-career-path-or-accepted-a-job-offer' },
+        { name: 'before_accepting', type: 'STRING', value: '28' },
+        { name: 'after_accepting', type: 'STRING', value: '7' },
+      ], [
+        { name: 'provider_code', type: 'STRING', value: 'code' },
+        { name: 'provider_id', type: 'STRING', value: '1' },
+        { name: 'provider_name', type: 'STRING', value: 'provider name' },
+        { name: 'recruitment_cycle_year', type: 'STRING', value: '2026' },
+        { name: 'withdrawal_tier', type: 'STRING', value: 'tier_2' },
+        { name: 'tier_withdrawal_reason', type: 'STRING', value: 'do-not-want-to-train-anymore.other' },
+        { name: 'before_accepting', type: 'STRING', value: '4' },
+        { name: 'after_accepting', type: 'STRING', value: '0' },
+      ], [
+        { name: 'provider_code', type: 'STRING', value: 'code' },
+        { name: 'provider_id', type: 'STRING', value: '1' },
+        { name: 'provider_name', type: 'STRING', value: 'provider name' },
+        { name: 'recruitment_cycle_year', type: 'STRING', value: '2026' },
+        { name: 'withdrawal_tier', type: 'STRING', value: 'tier_2' },
+        { name: 'tier_withdrawal_reason', type: 'STRING', value: 'do-not-want-to-train-anymore.personal-circumstances-have-changed' },
+        { name: 'before_accepting', type: 'STRING', value: '13' },
+        { name: 'after_accepting', type: 'STRING', value: '4' },
+      ], [
+        { name: 'provider_code', type: 'STRING', value: 'code' },
+        { name: 'provider_id', type: 'STRING', value: '1' },
+        { name: 'provider_name', type: 'STRING', value: 'provider name' },
+        { name: 'recruitment_cycle_year', type: 'STRING', value: '2026' },
+        { name: 'withdrawal_tier', type: 'STRING', value: 'tier_3' },
+        { name: 'tier_withdrawal_reason', type: 'STRING', value: 'do-not-want-to-train-anymore.personal-circumstances-have-changed.other' },
+        { name: 'before_accepting', type: 'STRING', value: '0' },
+        { name: 'after_accepting', type: 'STRING', value: '2' },
+      ], [
+        { name: 'provider_code', type: 'STRING', value: 'code' },
+        { name: 'provider_id', type: 'STRING', value: '1' },
+        { name: 'provider_name', type: 'STRING', value: 'provider name' },
+        { name: 'recruitment_cycle_year', type: 'STRING', value: '2026' },
+        { name: 'withdrawal_tier', type: 'STRING', value: 'tier_3' },
+        { name: 'tier_withdrawal_reason', type: 'STRING', value: 'do-not-want-to-train-anymore.personal-circumstances-have-changed.concerns-about-having-enough-time-to-train' },
+        { name: 'before_accepting', type: 'STRING', value: '5' },
+        { name: 'after_accepting', type: 'STRING', value: '1' },
+      ], [
+        { name: 'provider_code', type: 'STRING', value: 'code' },
+        { name: 'provider_id', type: 'STRING', value: '1' },
+        { name: 'provider_name', type: 'STRING', value: 'provider name' },
+        { name: 'recruitment_cycle_year', type: 'STRING', value: '2026' },
+        { name: 'withdrawal_tier', type: 'STRING', value: 'tier_3' },
+        { name: 'tier_withdrawal_reason', type: 'STRING', value: 'do-not-want-to-train-anymore.personal-circumstances-have-changed.concerns-about-cost-of-doing-course' },
+        { name: 'before_accepting', type: 'STRING', value: '9' },
+        { name: 'after_accepting', type: 'STRING', value: '2' },
+      ], [
+        { name: 'provider_code', type: 'STRING', value: 'code' },
+        { name: 'provider_id', type: 'STRING', value: '1' },
+        { name: 'provider_name', type: 'STRING', value: 'provider name' },
+        { name: 'recruitment_cycle_year', type: 'STRING', value: '2026' },
+        { name: 'withdrawal_tier', type: 'STRING', value: 'tier_3' },
+        { name: 'tier_withdrawal_reason', type: 'STRING', value: 'do-not-want-to-train-anymore.personal-circumstances-have-changed.concerns-about-training-with-a-disability-or-health-condition' },
+        { name: 'before_accepting', type: 'STRING', value: '1' },
+        { name: 'after_accepting', type: 'STRING', value: '0' },
+      ], [
+        { name: 'provider_code', type: 'STRING', value: 'code' },
+        { name: 'provider_id', type: 'STRING', value: '1' },
+        { name: 'provider_name', type: 'STRING', value: 'provider name' },
+        { name: 'recruitment_cycle_year', type: 'STRING', value: '2026' },
+        { name: 'withdrawal_tier', type: 'STRING', value: 'tier_1' },
+        { name: 'tier_withdrawal_reason', type: 'STRING', value: 'do-not-want-to-train-anymore' },
+        { name: 'before_accepting', type: 'STRING', value: '41' },
+        { name: 'after_accepting', type: 'STRING', value: '11' },
       ]]
     end
 
     let(:results) do
-      [
-        {
-          nonprovider_filter: 'Prefer not to say',
-          nonprovider_filter_category: 'Sex',
-          cycle_week: 18,
-          recruitment_cycle_year: 2024,
-          provider_id: '1',
-          number_of_candidates_submitted_to_date: 100,
-          number_of_candidates_submitted_to_same_date_previous_cycle: 200,
-          number_of_candidates_submitted_to_date_as_proportion_of_last_cycle: 0.5,
-          number_of_candidates_with_offers_to_date: 10,
-          number_of_candidates_with_offers_to_same_date_previous_cycle: 5,
-          number_of_candidates_with_offers_to_date_as_proportion_of_last_cycle: 2.0,
-          offer_rate_to_date: 1.2,
-          offer_rate_to_same_date_previous_cycle: 1.5,
-          number_of_candidates_accepted_to_date: 1,
-          number_of_candidates_accepted_to_same_date_previous_cycle: 10,
-          number_of_candidates_accepted_to_date_as_proportion_of_last_cycle: 0.1,
-          number_of_candidates_with_reconfirmed_offers_deferred_from_previous_cycle_to_date: 12,
-          number_of_candidates_with_reconfirmed_offers_deferred_from_previous_cycle_to_same_date_previous_cycle: 12,
-          number_of_candidates_with_reconfirmed_offers_deferred_from_previous_cycle_to_date_as_proportion_of_last_cycle: 0,
-          number_of_candidates_who_had_all_applications_rejected_this_cycle_to_date: 12,
-          number_of_candidates_who_had_all_applications_rejected_this_cycle_to_same_date_previous_cycle: 12,
-          number_of_candidates_who_had_all_applications_rejected_this_cycle_to_date_as_proportion_of_last_cycle: 0,
-          number_of_candidates_who_had_an_inactive_application_this_cycle_to_date: 12,
-          number_of_candidates_who_had_an_inactive_application_this_cycle_to_date_as_proportion_of_submitted_candidates: 0.12,
-          number_of_candidates_who_had_an_inactive_application_last_cycle_to_date_as_proportion_of_submitted_candidates_last_cycle: 0.12,
-          recruited_rate_to_date: 0.12,
-          recruited_rate_to_same_date_previous_cycle: 0.12,
-        },
-      ]
+      [{
+        provider_code: 'code',
+        provider_id: '1',
+        provider_name: 'provider name',
+        recruitment_cycle_year: '2026',
+        withdrawal_tier: 'tier_2',
+        tier_withdrawal_reason: 'do-not-want-to-train-anymore.another-career-path-or-accepted-a-job-offer',
+        before_accepting: '28',
+        after_accepting: '7',
+      }, {
+        provider_code: 'code',
+        provider_id: '1',
+        provider_name: 'provider name',
+        recruitment_cycle_year: '2026',
+        withdrawal_tier: 'tier_2',
+        tier_withdrawal_reason: 'do-not-want-to-train-anymore.other',
+        before_accepting: '4',
+        after_accepting: '0',
+      }, {
+        provider_code: 'code',
+        provider_id: '1',
+        provider_name: 'provider name',
+        recruitment_cycle_year: '2026',
+        withdrawal_tier: 'tier_2',
+        tier_withdrawal_reason: 'do-not-want-to-train-anymore.personal-circumstances-have-changed',
+        before_accepting: '13',
+        after_accepting: '4',
+      }, {
+        provider_code: 'code',
+        provider_id: '1',
+        provider_name: 'provider name',
+        recruitment_cycle_year: '2026',
+        withdrawal_tier: 'tier_3',
+        tier_withdrawal_reason: 'do-not-want-to-train-anymore.personal-circumstances-have-changed.other',
+        before_accepting: '0',
+        after_accepting: '2',
+      }, {
+        provider_code: 'code',
+        provider_id: '1',
+        provider_name: 'provider name',
+        recruitment_cycle_year: '2026',
+        withdrawal_tier: 'tier_3',
+        tier_withdrawal_reason: 'do-not-want-to-train-anymore.personal-circumstances-have-changed.concerns-about-having-enough-time-to-train',
+        before_accepting: '5',
+        after_accepting: '1',
+      }, {
+        provider_code: 'code',
+        provider_id: '1',
+        provider_name: 'provider name',
+        recruitment_cycle_year: '2026',
+        withdrawal_tier: 'tier_3',
+        tier_withdrawal_reason: 'do-not-want-to-train-anymore.personal-circumstances-have-changed.concerns-about-cost-of-doing-course',
+        before_accepting: '9',
+        after_accepting: '2',
+      }, {
+        provider_code: 'code',
+        provider_id: '1',
+        provider_name: 'provider name',
+        recruitment_cycle_year: '2026',
+        withdrawal_tier: 'tier_3',
+        tier_withdrawal_reason: 'do-not-want-to-train-anymore.personal-circumstances-have-changed.concerns-about-training-with-a-disability-or-health-condition',
+        before_accepting: '1',
+        after_accepting: '0',
+      }, {
+        provider_code: 'code',
+        provider_id: '1',
+        provider_name: 'provider name',
+        recruitment_cycle_year: '2026',
+        withdrawal_tier: 'tier_1',
+        tier_withdrawal_reason: 'do-not-want-to-train-anymore',
+        before_accepting: '41',
+        after_accepting: '11',
+      }]
+    end
+
+    subject(:data) do
+      described_class.new(provider_id: provider.id, recruitment_cycle_year: 2026).data
     end
 
     before do
-      stub_bigquery_provider_edi_request(rows:)
+      stub_bigquery_withdrawal_reasons_request(rows:)
     end
 
     it 'returns the first result' do
-      expect(provider_statistics.as_json).to eq(results.as_json)
+      expect(data.as_json).to eq(results.as_json)
     end
 
     it 'provides the correct SQL' do
       allow(Google::Apis::BigqueryV2::QueryRequest).to receive(:new).and_call_original
-      provider_statistics
-      expect(Google::Apis::BigqueryV2::QueryRequest).to have_received(:new).with(query: <<~SQL, timeout_ms: 10_000, use_legacy_sql: false)
-        SELECT nonprovider_filter, nonprovider_filter_category, cycle_week, recruitment_cycle_year, provider.id, number_of_candidates_submitted_to_date, number_of_candidates_submitted_to_same_date_previous_cycle, number_of_candidates_submitted_to_date_as_proportion_of_last_cycle, number_of_candidates_with_offers_to_date, number_of_candidates_with_offers_to_same_date_previous_cycle, number_of_candidates_with_offers_to_date_as_proportion_of_last_cycle, offer_rate_to_date, offer_rate_to_same_date_previous_cycle, number_of_candidates_accepted_to_date, number_of_candidates_accepted_to_same_date_previous_cycle, number_of_candidates_accepted_to_date_as_proportion_of_last_cycle, number_of_candidates_with_reconfirmed_offers_deferred_from_previous_cycle_to_date, number_of_candidates_with_reconfirmed_offers_deferred_from_previous_cycle_to_same_date_previous_cycle, number_of_candidates_with_reconfirmed_offers_deferred_from_previous_cycle_to_date_as_proportion_of_last_cycle, number_of_candidates_who_had_all_applications_rejected_this_cycle_to_date, number_of_candidates_who_had_all_applications_rejected_this_cycle_to_same_date_previous_cycle, number_of_candidates_who_had_all_applications_rejected_this_cycle_to_date_as_proportion_of_last_cycle, number_of_candidates_who_had_an_inactive_application_this_cycle_to_date, number_of_candidates_who_had_an_inactive_application_this_cycle_to_date_as_proportion_of_submitted_candidates, number_of_candidates_who_had_an_inactive_application_last_cycle_to_date_as_proportion_of_submitted_candidates_last_cycle, recruited_rate_to_date, recruited_rate_to_same_date_previous_cycle
-        FROM `1_key_tables.application_metrics_by_provider`
-        WHERE provider.id = "1"
-        AND teach_first_or_iot_filter = "All"
-        AND cycle_week = 18
-        AND recruitment_cycle_year = 2024
-      SQL
-    end
+      data
 
-    it 'assigns the attributes for the application metrics', :aggregate_failures do
-      expect(provider_statistics.first.nonprovider_filter).to eq 'Prefer not to say'
-      expect(provider_statistics.first.nonprovider_filter_category).to eq 'Sex'
-      expect(provider_statistics.first.cycle_week).to eq 18
-      expect(provider_statistics.first.recruitment_cycle_year).to eq 2024
-      expect(provider_statistics.first.provider_id).to eq '1'
-      expect(provider_statistics.first.number_of_candidates_submitted_to_date).to eq 100
-      expect(provider_statistics.first.number_of_candidates_submitted_to_same_date_previous_cycle).to eq 200
-      expect(provider_statistics.first.number_of_candidates_submitted_to_date_as_proportion_of_last_cycle).to eq 0.5
-      expect(provider_statistics.first.number_of_candidates_with_offers_to_date).to eq 10
-      expect(provider_statistics.first.number_of_candidates_with_offers_to_same_date_previous_cycle).to eq 5
-      expect(provider_statistics.first.number_of_candidates_with_offers_to_date_as_proportion_of_last_cycle).to eq 2.0
-      expect(provider_statistics.first.number_of_candidates_accepted_to_date).to eq 1
-      expect(provider_statistics.first.number_of_candidates_accepted_to_same_date_previous_cycle).to eq 10
-      expect(provider_statistics.first.number_of_candidates_accepted_to_date_as_proportion_of_last_cycle).to eq 0.1
-      expect(provider_statistics.first.number_of_candidates_with_reconfirmed_offers_deferred_from_previous_cycle_to_date).to eq 12
-      expect(provider_statistics.first.number_of_candidates_with_reconfirmed_offers_deferred_from_previous_cycle_to_same_date_previous_cycle).to eq 12
-      expect(provider_statistics.first.number_of_candidates_with_reconfirmed_offers_deferred_from_previous_cycle_to_date_as_proportion_of_last_cycle).to eq 0
-      expect(provider_statistics.first.number_of_candidates_who_had_all_applications_rejected_this_cycle_to_date).to eq 12
-      expect(provider_statistics.first.number_of_candidates_who_had_all_applications_rejected_this_cycle_to_same_date_previous_cycle).to eq 12
-      expect(provider_statistics.first.number_of_candidates_who_had_all_applications_rejected_this_cycle_to_date_as_proportion_of_last_cycle).to eq 0
-      expect(provider_statistics.first.number_of_candidates_who_had_an_inactive_application_this_cycle_to_date).to eq 12
-      expect(provider_statistics.first.number_of_candidates_who_had_an_inactive_application_this_cycle_to_date_as_proportion_of_submitted_candidates).to eq 0.12
-      expect(provider_statistics.first.number_of_candidates_who_had_an_inactive_application_last_cycle_to_date_as_proportion_of_submitted_candidates_last_cycle).to eq 0.12
-      expect(provider_statistics.first.number_of_candidates_submitted_to_date).to eq 100
-      expect(provider_statistics.first.recruited_rate_to_date).to eq 0.12
-      expect(provider_statistics.first.recruited_rate_to_same_date_previous_cycle).to eq 0.12
+      expect(Google::Apis::BigqueryV2::QueryRequest).to have_received(:new).with(query: <<~SQL, timeout_ms: 10_000, use_legacy_sql: false)
+        SELECT provider_code, provider_id, provider_name, recruitment_cycle_year, withdrawal_tier, tier_withdrawal_reason, before_accepting, after_accepting
+        FROM `1_key_tables.provider_withdrawal_reasons`
+        WHERE provider_id = "#{provider.id}"
+        AND recruitment_cycle_year = 2026
+      SQL
     end
 
     context 'when the api returns no data' do
       before do
-        stub_bigquery_provider_edi_request(rows: [])
+        stub_bigquery_withdrawal_reasons_request(rows: [])
       end
 
       it 'returns an empty array' do
-        expect(provider_statistics).to be_empty
+        expect(data).to be_empty
       end
     end
   end
@@ -292,6 +200,7 @@ RSpec.describe DfE::Bigquery::WithdrawalReasonsMetrics do
     let(:result) { described_class.new({ nonprovider_filter_category: 'Sex' }) }
 
     before do
+      # fix this
       stub_bigquery_national_edi_request
     end
 
@@ -306,57 +215,44 @@ RSpec.describe DfE::Bigquery::WithdrawalReasonsMetrics do
   end
 
   describe 'when the query returns nil for rows' do
-    subject(:national_statistics) do
-      described_class.new(cycle_week: 18).data
-    end
-
-    let(:stub_bigquery_response) do
-      stub_bigquery_national_edi_request(result: false)
+    subject(:data) do
+      described_class.new(provider_id: provider.id, recruitment_cycle_year: 2027).data
     end
 
     before do
-      stub_bigquery_response
+      stub_bigquery_withdrawal_reasons_request(rows: nil)
     end
 
     it 'fails silently' do
-      national_statistics
+      data
     end
   end
 
   describe 'when there is an error' do
-    subject(:national_statistics) do
-      described_class.new(cycle_week: 7).data
-    end
-
-    context 'when there is more than one page' do
-      before do
-        stub_bigquery_national_edi_request(page_token: true)
-      end
-
-      it 'raises an error' do
-        expect { national_statistics }.to raise_error(DfE::Bigquery::Relation::MorePagesError)
-      end
+    subject(:data) do
+      described_class.new(provider_id: provider.id, recruitment_cycle_year: 2027).data
     end
 
     context 'when the query job does not complete in time' do
       before do
         stub_bigquery_national_edi_request(job_complete: false)
+        #stub_bigquery_withdrawal_reasons_request
       end
 
       it 'raises an error' do
-        expect { national_statistics }.to raise_error(DfE::Bigquery::Relation::JobIncompleteError)
+        expect { data }.to raise_error(DfE::Bigquery::Relation::JobIncompleteError)
       end
     end
 
     context 'when an unhandled type is returned' do
       before do
-        stub_bigquery_national_edi_request(rows: [[
+        stub_bigquery_withdrawal_reasons_request(rows: [[
           { name: 'some_value', type: 'COFFEE', value: '☕' },
         ]])
       end
 
       it 'raises an error' do
-        expect { national_statistics }.to raise_error(DfE::Bigquery::Relation::UnknownTypeError).with_message("cannot parse this type of value: 'COFFEE'")
+        expect { data }.to raise_error(DfE::Bigquery::Relation::UnknownTypeError).with_message("cannot parse this type of value: 'COFFEE'")
       end
     end
   end

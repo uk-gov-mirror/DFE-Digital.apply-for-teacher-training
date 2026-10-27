@@ -31,6 +31,12 @@ module DfE
         allow(bigquery_client).to receive(:query_job).and_return(stub_bigquery_national_edi_report_response(rows:, job_complete:, page_token:, result:))
       end
 
+      def stub_bigquery_withdrawal_reasons_request(rows: nil)
+        bigquery_client = instance_double(Google::Apis::BigqueryV2::BigqueryService)
+        allow(DfE::Bigquery).to receive(:client).and_return(bigquery_client)
+        allow(bigquery_client).to receive(:query_job).and_return(stub_bigquery_withdrawal_reasons_response(rows:))
+      end
+
       def stub_bigquery_provider_edi_request(rows: nil, job_complete: true, page_token: nil, result: true)
         bigquery_client = instance_double(Google::Apis::BigqueryV2::BigqueryService)
         allow(DfE::Bigquery).to receive(:client).and_return(bigquery_client)
@@ -210,6 +216,10 @@ module DfE
           { name: 'number_of_candidates_who_had_an_inactive_application_this_cycle_to_date_as_proportion_of_submitted_candidates', type: 'FLOAT', value: 0.0 },
           { name: 'number_of_candidates_who_had_an_inactive_application_last_cycle_to_date_as_proportion_of_submitted_candidates_last_cycle', type: 'FLOAT', value: 0.0 },
         ]], job_complete:, page_token:, result:)
+      end
+
+      def stub_bigquery_withdrawal_reasons_response(rows: nil)
+        BigqueryStubs.stub_response(rows:) if rows
       end
 
       def stub_bigquery_provider_edi_report_response(rows: nil, job_complete: nil, page_token: nil, result: true)

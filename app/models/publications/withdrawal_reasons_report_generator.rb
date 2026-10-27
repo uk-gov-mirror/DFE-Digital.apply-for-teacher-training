@@ -13,14 +13,10 @@ module Publications
       Publications::WithdrawalReasonsReport.create!(
         provider_id:,
         recruitment_cycle_year:,
-        provider_code: data[:provider_code],
-        provider_name: data[:provider_name],
-        withdrawal_tier: data[:withdrawal_tier],
-        tier_withdrawal_reason: data[:tier_withdrawal_reason],
-        before_accepting: data[:before_accepting],
-        after_accepting: data[:after_accepting],
+        statistics: data,
       )
     end
+
     delegate :data, to: :client
   end
 end

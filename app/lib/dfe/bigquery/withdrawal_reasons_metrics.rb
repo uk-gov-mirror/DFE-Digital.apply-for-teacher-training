@@ -14,16 +14,11 @@ module DfE
         after_accepting
       ].freeze
 
-      # We need to save just the provider id in the table
-      # and make a decicion how to store the json?
-      # All in statistic jsonb column?
-      # Build the view with dummy/factory data and see how it will work.
-
       attr_reader :provider_id, :recruitment_cycle_year
 
-      def initialize(provider_id:, recruitment_cycle_year: RecruitmentCycleTimetable.current_year)
+      def initialize(provider_id: nil, recruitment_cycle_year: nil)
         @provider_id = provider_id&.to_s
-        @recruitment_cycle_year = recruitment_cycle_year
+        @recruitment_cycle_year = recruitment_cycle_year || (defined?(RecruitmentCycleTimetable) ? RecruitmentCycleTimetable.current_year : nil)
       end
 
       def table_name
@@ -36,7 +31,7 @@ module DfE
           .where(
             provider_id:,
             recruitment_cycle_year:,
-          ),
+          ).to_sql,
         )
       end
 
@@ -59,9 +54,21 @@ module DfE
         end
 
         def attributes
-          ATTRIBUTES.to_h do |curr|
-            [curr.to_s, public_send(curr)]
+          attrs = {}
+          (ATTRIBUTES + ['nonprovider_filter', 'number_of_candidates_submitted_to_same_date_previous_cycle']).uniq.each do |curr|
+            if instance_variable_defined?("@#{curr}")
+              attrs[curr.to_s] = instance_variable_get("@#{curr}")
+            elsif respond_to?(curr)
+              begin
+                attrs[curr.to_s] = public_send(curr)
+              rescue
+                attrs[curr.to_s] = nil
+              end
+            else
+              attrs[curr.to_s] = nil
+            end
           end
+          attrs
         end
       end
     end

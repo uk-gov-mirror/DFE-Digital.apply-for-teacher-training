@@ -5,7 +5,7 @@ module Publications
     retry_on StandardError, attempts: 3
 
     def perform
-      Provider.all.each do |provider|
+      Provider.find_each.each do |provider|
         Publications::WithdrawalReasonsReportGenerator.new.call(
           provider_id: provider.id,
         )
