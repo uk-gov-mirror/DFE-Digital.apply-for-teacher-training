@@ -10,7 +10,7 @@ class EnqueueTriggeredDuplicateMatchCheck
   def call
     yield.tap do |saved|
       if saved && check_required?
-        UpdateTriggeredDuplicateMatchesWorker.perform_later(@application_form.id)
+        UpdateDuplicateMatchesWorker.perform_later(@application_form.id)
       end
     end
   end
